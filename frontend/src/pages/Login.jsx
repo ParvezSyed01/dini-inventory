@@ -1,5 +1,15 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import {
+  Scissors,
+  Mail,
+  Lock,
+  AlertCircle,
+  ArrowRight,
+  Loader2,
+  Eye,
+  EyeOff,
+} from '../components/Icons';
 import { useAuth } from '../context/AuthContext';
 
 export default function Login() {
@@ -7,6 +17,7 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -40,48 +51,163 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
-      <form onSubmit={handleLogin} className="bg-white p-6 rounded shadow-md w-full max-w-sm space-y-4">
-        <h2 className="text-xl font-bold uppercase text-center">Login</h2>
+    <div className="min-h-screen grid lg:grid-cols-2">
+      {/* ---------- Brand panel (desktop only) ---------- */}
+      <div className="relative hidden lg:flex flex-col justify-between bg-brass-sheen p-12 overflow-hidden">
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[0.07]"
+          style={{
+            backgroundImage:
+              'repeating-linear-gradient(45deg, #fff 0 1px, transparent 1px 14px), repeating-linear-gradient(-45deg, #fff 0 1px, transparent 1px 14px)',
+          }}
+        />
+        <div
+          className="pointer-events-none absolute -top-28 -right-28 h-96 w-96 rounded-full blur-3xl"
+          style={{ background: 'radial-gradient(circle, rgba(251,191,36,0.28), transparent 70%)' }}
+        />
 
-        {error && (
-          <div className="p-2 bg-red-100 border border-red-200 text-red-700 text-xs font-bold rounded">
-            {error}
+        <div className="relative flex items-center gap-3">
+          <span className="grid h-11 w-11 place-items-center rounded-2xl bg-amber-100/10 ring-1 ring-amber-200/25 backdrop-blur">
+            <Scissors className="h-5 w-5 text-amber-200" strokeWidth={2.5} />
+          </span>
+          <div>
+            <p className="font-display text-lg font-extrabold tracking-[0.18em] text-amber-50 leading-none">
+              DINI DESIGNERS
+            </p>
+            <p className="mt-1.5 text-[9px] font-bold uppercase tracking-[0.24em] text-amber-200/60 leading-none">
+              Atelier Management
+            </p>
           </div>
-        )}
-
-        <div>
-          <label className="block text-xs font-bold uppercase mb-1">Email</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full border p-2 rounded text-sm bg-gray-50 focus:bg-white"
-            placeholder="worker@example.com"
-            required
-          />
         </div>
 
-        <div>
-          <label className="block text-xs font-bold uppercase mb-1">Password</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full border p-2 rounded text-sm bg-gray-50 focus:bg-white"
-            placeholder="••••••••"
-            required
-          />
+        <div className="relative max-w-md">
+          <h1 className="font-display text-4xl font-extrabold leading-[1.15] text-amber-50">
+            Every stitch,
+            <br />
+            <span className="text-amber-300">accounted for.</span>
+          </h1>
+          <p className="mt-5 text-sm leading-relaxed text-amber-100/70">
+            Bespoke orders, twenty-point measurements, fabric allocation, and workshop tasks —
+            managed in one register.
+          </p>
+
+          <div className="mt-9 flex flex-wrap gap-2">
+            {['Orders', 'Measurements', 'Fabric Stock', 'Tasks'].map((chip) => (
+              <span
+                key={chip}
+                className="rounded-full border border-amber-200/20 bg-amber-100/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-amber-100/90 backdrop-blur"
+              >
+                {chip}
+              </span>
+            ))}
+          </div>
         </div>
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-amber-950 text-white font-bold py-2 rounded uppercase text-xs hover:bg-amber-900 disabled:opacity-50 transition-colors"
-        >
-          {loading ? 'Logging in...' : 'Login'}
-        </button>
-      </form>
+        <p className="relative text-[10px] font-semibold uppercase tracking-[0.18em] text-amber-200/40">
+          Smart Apparel Business Management
+        </p>
+      </div>
+
+      {/* ---------- Form panel ---------- */}
+      <div className="flex items-center justify-center p-5 sm:p-8">
+        <div className="w-full max-w-md animate-rise-in">
+          {/* Mobile brand */}
+          <div className="lg:hidden mb-8 flex flex-col items-center text-center">
+            <span className="grid h-14 w-14 place-items-center rounded-2xl bg-brass-sheen shadow-card">
+              <Scissors className="h-6 w-6 text-amber-200" strokeWidth={2.5} />
+            </span>
+            <p className="mt-4 font-display text-lg font-extrabold tracking-[0.18em] text-amber-950">
+              DINI DESIGNERS
+            </p>
+            <p className="mt-1 text-[9px] font-bold uppercase tracking-[0.22em] text-stone-400">
+              Atelier Management
+            </p>
+          </div>
+
+          <div className="card p-7 sm:p-9">
+            <div className="mb-7">
+              <p className="eyebrow">Secure Access</p>
+              <h2 className="mt-2 font-display text-2xl font-extrabold tracking-tight text-amber-950">
+                Welcome back
+              </h2>
+              <p className="mt-1.5 text-sm text-stone-500">
+                Sign in to your studio account to continue.
+              </p>
+            </div>
+
+            <form onSubmit={handleLogin} className="space-y-5">
+              {error && (
+                <div className="alert-error">
+                  <AlertCircle className="h-4 w-4 shrink-0 mt-px" strokeWidth={2.5} />
+                  <span>{error}</span>
+                </div>
+              )}
+
+              <div>
+                <label className="label">Email</label>
+                <div className="relative">
+                  <Mail
+                    className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400"
+                    strokeWidth={2.2}
+                  />
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="input pl-10"
+                    placeholder="worker@example.com"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="label">Password</label>
+                <div className="relative">
+                  <Lock
+                    className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400"
+                    strokeWidth={2.2}
+                  />
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="input pl-10 pr-11"
+                    placeholder="••••••••"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((v) => !v)}
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    className="absolute right-2 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center rounded-lg text-stone-400 transition-colors hover:bg-stone-100 hover:text-stone-600"
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <button type="submit" disabled={loading} className="btn-primary btn-block btn-lg">
+                {loading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Logging in...
+                  </>
+                ) : (
+                  <>
+                    Login
+                    <ArrowRight className="h-4 w-4" strokeWidth={2.5} />
+                  </>
+                )}
+              </button>
+            </form>
+          </div>
+
+          <p className="mt-6 text-center text-[11px] font-medium text-stone-400">
+            Trouble signing in? Contact your studio administrator.
+          </p>
+        </div>
+      </div>
     </div>
   );
 }

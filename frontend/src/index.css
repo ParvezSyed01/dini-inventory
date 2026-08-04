@@ -2,25 +2,316 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  -webkit-tap-highlight-color: transparent;
-  background-color: theme('colors.canvas');
-  color: theme('colors.ink.900');
-  font-family: theme('fontFamily.body');
+/* ============================================================
+   DINI DESIGNERS — DESIGN SYSTEM
+   Palette is unchanged: deep amber-950 brand, warm amber accents,
+   stone/gray neutrals. These classes just make it consistent.
+   ============================================================ */
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    -webkit-tap-highlight-color: transparent;
+    background-color: #f6f4f0;
+    background-image: radial-gradient(
+        1200px 520px at 10% -10%,
+        rgba(180, 134, 46, 0.12),
+        transparent 60%
+      ),
+      radial-gradient(900px 460px at 95% -5%, rgba(69, 26, 3, 0.08), transparent 55%);
+    background-attachment: fixed;
+    color: #1c1917;
+    font-family: theme('fontFamily.body');
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1,
+  h2,
+  h3,
+  .font-display {
+    font-family: theme('fontFamily.display');
+    letter-spacing: -0.011em;
+  }
+
+  /* Visible keyboard focus everywhere — mobile UIs get tapped, but this app
+     still needs to be usable with a keyboard/screen reader. */
+  :focus-visible {
+    outline: 2px solid #92400e;
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+
+  /* Comfortable minimum tap target on touch devices */
+  button,
+  a,
+  input,
+  select,
+  textarea {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Numeric data should never jiggle between rows */
+  td,
+  th,
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
+  ::selection {
+    background: #fde68a;
+    color: #451a03;
+  }
+
+  /* Slim, warm scrollbars */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #d6d3d1 transparent;
+  }
+  *::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  *::-webkit-scrollbar-thumb {
+    background: #d6d3d1;
+    border-radius: 999px;
+    border: 3px solid transparent;
+    background-clip: content-box;
+  }
+  *::-webkit-scrollbar-thumb:hover {
+    background: #a8a29e;
+    background-clip: content-box;
+  }
 }
 
-h1, h2, h3, .font-display {
-  font-family: theme('fontFamily.display');
-}
+@layer components {
+  /* ---------- Surfaces ---------- */
+  .card {
+    @apply bg-white rounded-2xl border border-stone-200/80 shadow-card;
+  }
 
-/* Visible keyboard focus everywhere — mobile UIs get tapped, but this app
-   still needs to be usable with a keyboard/screen reader. */
-:focus-visible {
-  outline: 2px solid theme('colors.brass.DEFAULT');
-  outline-offset: 2px;
-}
+  .card-hover {
+    @apply transition-all duration-200 hover:shadow-card-hover hover:border-stone-300/80;
+  }
 
-/* Comfortable minimum tap target on touch devices */
-button, a, input, select, textarea {
-  -webkit-tap-highlight-color: transparent;
+  .card-head {
+    @apply px-5 py-4 sm:px-6 sm:py-5 border-b border-stone-100;
+  }
+
+  .card-body {
+    @apply p-5 sm:p-6;
+  }
+
+  .panel-warm {
+    @apply rounded-2xl border border-amber-200/70 bg-gradient-to-b from-amber-50 to-amber-50/40;
+  }
+
+  .panel-muted {
+    @apply rounded-2xl border border-stone-200 bg-stone-50/70;
+  }
+
+  /* ---------- Typography ---------- */
+  .page-title {
+    @apply font-display text-xl sm:text-2xl font-extrabold tracking-tight text-amber-950;
+  }
+
+  .section-title {
+    @apply font-display text-base font-extrabold tracking-tight text-amber-950;
+  }
+
+  .eyebrow {
+    @apply text-[11px] font-bold uppercase tracking-[0.14em] text-stone-500;
+  }
+
+  .subtle {
+    @apply text-xs text-stone-500;
+  }
+
+  /* ---------- Forms ---------- */
+  .label {
+    @apply block text-[11px] font-bold uppercase tracking-[0.08em] text-stone-600 mb-1.5;
+  }
+
+  .input {
+    @apply w-full rounded-xl border border-stone-300 bg-white px-3.5 py-2.5 text-sm text-stone-900
+           shadow-sm transition duration-150 placeholder:text-stone-400
+           hover:border-stone-400
+           focus:border-amber-800 focus:ring-4 focus:ring-amber-900/10 focus:outline-none
+           disabled:cursor-not-allowed disabled:bg-stone-100 disabled:text-stone-500 disabled:border-stone-200;
+  }
+
+  /* Native selects: keep a chevron, kill the ugly default arrow box */
+  .select {
+    @apply input appearance-none bg-no-repeat pr-10;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2378716c' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-position: right 0.85rem center;
+    background-size: 16px;
+  }
+
+  .input-numeric {
+    @apply text-center font-mono tabular-nums;
+  }
+
+  /* ---------- Buttons ---------- */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5
+           text-[11px] font-bold uppercase tracking-[0.1em] leading-none
+           transition-all duration-150 select-none
+           disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none;
+  }
+
+  .btn-primary {
+    @apply btn bg-amber-950 text-amber-50 shadow-sm
+           hover:bg-amber-900 hover:shadow-md
+           active:translate-y-px active:shadow-sm;
+  }
+
+  .btn-accent {
+    @apply btn bg-amber-800 text-white shadow-sm
+           hover:bg-amber-900 hover:shadow-md
+           active:translate-y-px active:shadow-sm;
+  }
+
+  .btn-outline {
+    @apply btn border border-stone-300 bg-white text-stone-700 shadow-sm
+           hover:bg-stone-50 hover:border-stone-400 hover:text-stone-900
+           active:translate-y-px;
+  }
+
+  .btn-ghost {
+    @apply btn text-stone-500 hover:bg-stone-100 hover:text-stone-800;
+  }
+
+  .btn-success {
+    @apply btn bg-emerald-700 text-white shadow-sm hover:bg-emerald-800 hover:shadow-md active:translate-y-px;
+  }
+
+  .btn-danger {
+    @apply btn bg-red-700 text-white shadow-sm hover:bg-red-800 hover:shadow-md active:translate-y-px;
+  }
+
+  .btn-sm {
+    @apply px-3 py-2 text-[10px] rounded-lg gap-1.5;
+  }
+
+  .btn-lg {
+    @apply px-6 py-3.5 text-xs;
+  }
+
+  .btn-block {
+    @apply w-full;
+  }
+
+  /* ---------- Pills / badges ---------- */
+  .pill {
+    @apply inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1
+           text-[10px] font-bold uppercase tracking-[0.08em] whitespace-nowrap;
+  }
+
+  .pill-neutral {
+    @apply pill border-stone-200 bg-stone-100 text-stone-700;
+  }
+
+  .pill-amber {
+    @apply pill border-amber-200 bg-amber-50 text-amber-800;
+  }
+
+  .pill-blue {
+    @apply pill border-blue-200 bg-blue-50 text-blue-800;
+  }
+
+  .pill-purple {
+    @apply pill border-purple-200 bg-purple-50 text-purple-800;
+  }
+
+  .pill-green {
+    @apply pill border-emerald-200 bg-emerald-50 text-emerald-800;
+  }
+
+  .pill-red {
+    @apply pill border-red-200 bg-red-50 text-red-800;
+  }
+
+  /* Status <select> that still reads as a pill */
+  .pill-select {
+    @apply cursor-pointer appearance-none rounded-full border pl-3 pr-7 py-1.5
+           text-[10px] font-bold uppercase tracking-[0.08em]
+           bg-no-repeat transition focus:outline-none focus:ring-4 focus:ring-amber-900/10;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-position: right 0.5rem center;
+    background-size: 12px;
+  }
+
+  /* ---------- Alerts ---------- */
+  .alert {
+    @apply flex items-start gap-2.5 rounded-xl border px-4 py-3 text-xs font-semibold animate-fade-in;
+  }
+
+  .alert-error {
+    @apply alert border-red-200 bg-red-50 text-red-800;
+  }
+
+  .alert-success {
+    @apply alert border-emerald-200 bg-emerald-50 text-emerald-800;
+  }
+
+  .alert-info {
+    @apply alert border-blue-200 bg-blue-50 text-blue-800;
+  }
+
+  /* ---------- Tables ---------- */
+  .table-wrap {
+    @apply overflow-x-auto;
+  }
+
+  .table {
+    @apply w-full text-left text-sm border-collapse;
+  }
+
+  .table thead th {
+    @apply bg-stone-50/80 px-4 py-3 text-[10px] font-bold uppercase tracking-[0.1em] text-stone-500
+           border-b border-stone-200 whitespace-nowrap;
+  }
+
+  .table tbody td {
+    @apply px-4 py-3.5 align-middle border-b border-stone-100;
+  }
+
+  .table tbody tr {
+    @apply transition-colors hover:bg-amber-50/40;
+  }
+
+  .table tbody tr:last-child td {
+    @apply border-b-0;
+  }
+
+  /* Dark-headed variant used by the fabric logs */
+  .table-dark thead th {
+    @apply bg-amber-950 text-amber-200/80 border-b-0;
+  }
+
+  /* ---------- Bits ---------- */
+  .divider {
+    @apply h-px w-full bg-gradient-to-r from-transparent via-stone-200 to-transparent;
+  }
+
+  .empty-state {
+    @apply flex flex-col items-center justify-center gap-2 px-6 py-14 text-center;
+  }
+
+  .nav-link {
+    @apply inline-flex items-center gap-2 rounded-lg px-3 py-2 text-[11px] font-bold uppercase
+           tracking-[0.09em] transition-all duration-150 whitespace-nowrap;
+  }
+
+  .nav-link-active {
+    @apply bg-amber-100/95 text-amber-950 shadow-sm;
+  }
+
+  .nav-link-idle {
+    @apply text-amber-200/80 hover:bg-amber-900/60 hover:text-amber-50;
+  }
 }

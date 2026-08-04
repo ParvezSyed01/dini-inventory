@@ -1,5 +1,15 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabaseClient';
+import {
+  ListChecks,
+  RefreshCw,
+  Send,
+  CheckCircle2,
+  Clock,
+  Layers,
+  Loader2,
+  Inbox,
+} from '../../components/Icons';
 
 export default function MyTasks() {
   const [tasks, setTasks] = useState([]);
@@ -61,7 +71,7 @@ export default function MyTasks() {
     try {
       const { error: taskError } = await supabase
         .from('tasks')
-        .update({ 
+        .update({
           status: 'Under Review',
           updated_at: new Date().toISOString()
         })
@@ -92,80 +102,129 @@ export default function MyTasks() {
   };
 
   if (loading) {
-    return <div className="p-6 text-xs font-bold text-gray-500">Loading your tasks...</div>;
+    return (
+      <div className="mx-auto max-w-4xl">
+        <div className="card empty-state">
+          <Loader2 className="h-6 w-6 animate-spin text-amber-800" strokeWidth={2.5} />
+          <p className="text-sm font-semibold text-stone-500">Loading your tasks...</p>
+        </div>
+      </div>
+    );
   }
 
+  // Left accent + pill styling per status
+  const statusMeta = (status) =>
+    status === 'Completed'
+      ? { pill: 'pill-green', accent: 'from-emerald-600 to-emerald-400', Icon: CheckCircle2 }
+      : status === 'Under Review'
+        ? { pill: 'pill-amber', accent: 'from-amber-600 to-amber-400', Icon: Clock }
+        : { pill: 'pill-blue', accent: 'from-blue-600 to-blue-400', Icon: ListChecks };
+
+  const activeCount = tasks.filter((t) => t.status !== 'Completed').length;
+
   return (
-    <div className="max-w-4xl mx-auto p-6 space-y-4">
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-xl font-black uppercase text-amber-950">My Tasks</h1>
-        <button
-          onClick={fetchWorkerTasks}
-          className="text-xs font-bold text-amber-950 uppercase hover:underline"
-        >
-          Refresh Tasks
+    <div className="mx-auto max-w-4xl space-y-5">
+      {/* Header */}
+      <div className="card flex flex-wrap items-center justify-between gap-4 p-5">
+        <div className="flex items-center gap-3">
+          <span className="grid h-11 w-11 place-items-center rounded-2xl bg-brass-sheen text-amber-200">
+            <ListChecks className="h-5 w-5" strokeWidth={2.2} />
+          </span>
+          <div>
+            <h1 className="page-title">My Tasks</h1>
+            <p className="subtle mt-0.5">
+              {tasks.length === 0
+                ? 'Nothing assigned right now'
+                : `${activeCount} active · ${tasks.length} total`}
+            </p>
+          </div>
+        </div>
+        <button onClick={fetchWorkerTasks} className="btn-outline">
+          <RefreshCw className="h-3.5 w-3.5" strokeWidth={2.5} />
+          Refresh
         </button>
       </div>
 
       {tasks.length === 0 ? (
-        <div className="p-6 bg-white border border-gray-200 rounded-xl text-sm text-gray-500 shadow-sm">
-          No tasks currently assigned to your account.
+        <div className="card empty-state">
+          <span className="grid h-12 w-12 place-items-center rounded-2xl bg-stone-100 text-stone-400">
+            <Inbox className="h-5 w-5" strokeWidth={2} />
+          </span>
+          <p className="text-sm font-bold text-stone-700">
+            No tasks currently assigned to your account.
+          </p>
+          <p className="subtle">Your supervisor will assign work here.</p>
         </div>
       ) : (
         <div className="grid gap-4">
-          {tasks.map((task) => (
-            <div
-              key={task.id}
-              className="bg-white border border-gray-200 p-5 rounded-xl shadow-sm flex flex-col justify-between gap-4"
-            >
-              <div>
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-xs font-bold uppercase tracking-wider text-gray-400">
-                    {task.order_display}
-                  </span>
-                  <span
-                    className={`text-xs font-black uppercase px-2.5 py-1 rounded-full ${
-                      task.status === 'Completed'
-                        ? 'bg-green-100 text-green-800'
-                        : task.status === 'Under Review'
-                        ? 'bg-amber-100 text-amber-800 animate-pulse'
-                        : 'bg-blue-100 text-blue-800'
-                    }`}
-                  >
-                    {task.status}
-                  </span>
-                </div>
-                <p className="text-sm font-medium text-gray-800 whitespace-pre-wrap">
-                  {task.task_details}
-                </p>
-                {task.meters_issued > 0 && (
-                  <p className="text-xs font-bold text-amber-900 mt-2">
-                    Fabric Issued: {task.meters_issued} meters
-                  </p>
-                )}
-              </div>
+          {tasks.map((task) => {
+            const { pill, accent, Icon } = statusMeta(task.status);
 
-              <div className="border-t border-gray-100 pt-3 flex justify-end">
-                {task.status === 'Pending' || task.status === 'In Progress' ? (
-                  <button
-                    onClick={() => handleMarkForReview(task.id, task.task_details)}
-                    disabled={updatingId === task.id}
-                    className="bg-amber-950 hover:bg-amber-900 text-white font-bold text-xs uppercase px-4 py-2 rounded-lg transition-colors disabled:opacity-50"
-                  >
-                    {updatingId === task.id ? 'Submitting...' : 'Mark Review'}
-                  </button>
-                ) : task.status === 'Under Review' ? (
-                  <span className="text-xs font-bold text-amber-700 italic">
-                    Awaiting Physical Inspection & Admin Approval
-                  </span>
-                ) : (
-                  <span className="text-xs font-bold text-green-700 uppercase">
-                    Approved & Completed
-                  </span>
-                )}
+            return (
+              <div
+                key={task.id}
+                className="card card-hover relative flex flex-col justify-between gap-4 overflow-hidden p-5"
+              >
+                <span
+                  className={`absolute inset-y-0 left-0 w-1 bg-gradient-to-b ${accent}`}
+                  aria-hidden="true"
+                />
+
+                <div className="pl-2">
+                  <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                    <span className="eyebrow">{task.order_display}</span>
+                    <span className={pill}>
+                      <Icon className="h-3 w-3" strokeWidth={2.5} />
+                      {task.status}
+                    </span>
+                  </div>
+
+                  <p className="whitespace-pre-wrap text-sm font-medium leading-relaxed text-stone-800">
+                    {task.task_details}
+                  </p>
+
+                  {task.meters_issued > 0 && (
+                    <p className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-amber-50 px-2.5 py-1.5 text-xs font-bold text-amber-900">
+                      <Layers className="h-3.5 w-3.5" strokeWidth={2.5} />
+                      Fabric Issued: {task.meters_issued} meters
+                    </p>
+                  )}
+                </div>
+
+                <div className="flex justify-end border-t border-stone-100 pt-3.5 pl-2">
+                  {task.status === 'Pending' || task.status === 'In Progress' ? (
+                    <button
+                      onClick={() => handleMarkForReview(task.id, task.task_details)}
+                      disabled={updatingId === task.id}
+                      className="btn-primary btn-sm"
+                    >
+                      {updatingId === task.id ? (
+                        <>
+                          <Loader2 className="h-3 w-3 animate-spin" strokeWidth={2.5} />
+                          Submitting...
+                        </>
+                      ) : (
+                        <>
+                          <Send className="h-3 w-3" strokeWidth={2.5} />
+                          Mark Review
+                        </>
+                      )}
+                    </button>
+                  ) : task.status === 'Under Review' ? (
+                    <span className="inline-flex items-center gap-1.5 text-xs font-bold italic text-amber-700">
+                      <Clock className="h-3.5 w-3.5" strokeWidth={2.5} />
+                      Awaiting Physical Inspection & Admin Approval
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-emerald-700">
+                      <CheckCircle2 className="h-3.5 w-3.5" strokeWidth={2.5} />
+                      Approved & Completed
+                    </span>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

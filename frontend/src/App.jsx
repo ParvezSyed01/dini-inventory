@@ -11,7 +11,33 @@ import MyTasks from './pages/worker/MyTasks';
 import CreateEmployee from './pages/admin/CreateEmployee';
 
 const Unauthorized = () => (
-    <div className="p-8 text-red-500 font-bold">403 - Access Denied</div>
+    <div className="min-h-screen flex items-center justify-center p-6">
+        <div className="card max-w-sm w-full p-8 text-center">
+            <span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-red-50 text-red-600">
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="h-6 w-6"
+                    aria-hidden="true"
+                >
+                    <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+                    <path d="M7 11V7a5 5 0 0 1 9.9-1" />
+                </svg>
+            </span>
+            <p className="mt-5 font-display text-3xl font-extrabold tracking-tight text-stone-900">403</p>
+            <p className="mt-1 text-sm font-bold uppercase tracking-[0.12em] text-red-600">
+                Access Denied
+            </p>
+            <p className="mt-3 text-sm text-stone-500">
+                You don't have permission to view this page.
+            </p>
+        </div>
+    </div>
 );
 
 // Smart catch-all redirect based on role

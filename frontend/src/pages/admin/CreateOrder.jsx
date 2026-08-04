@@ -1,5 +1,19 @@
 import { useState } from 'react';
 import { supabase } from '../../lib/supabaseClient';
+import {
+  Search,
+  User,
+  Phone,
+  Shirt,
+  Palette,
+  Ruler,
+  Receipt,
+  Save,
+  Loader2,
+  AlertCircle,
+  CheckCircle2,
+  Info,
+} from '../../components/Icons';
 
 export default function CreateOrder() {
   const [phone, setPhone] = useState('');
@@ -196,193 +210,292 @@ export default function CreateOrder() {
     { id: 20, label: 'OTHERS', name: 'others' }
   ];
 
+  const filledCount = Object.values(measurements).filter((v) => v !== '' && v !== null).length;
+
+  const MessageIcon =
+    message.type === 'error' ? AlertCircle : message.type === 'success' ? CheckCircle2 : Info;
+
+  const renderMeasureField = (field) => (
+    <div key={field.name} className="flex items-center gap-3">
+      <span className="w-6 shrink-0 text-right font-mono text-[11px] font-bold text-stone-300">
+        {field.id}
+      </span>
+      <label
+        htmlFor={`m-${field.name}`}
+        className="w-32 shrink-0 text-[11px] font-bold uppercase tracking-wide text-stone-600 sm:w-36"
+      >
+        {field.label}
+      </label>
+      <input
+        id={`m-${field.name}`}
+        type="number"
+        step="0.25"
+        name={field.name}
+        value={measurements[field.name]}
+        onChange={handleMeasurementChange}
+        placeholder="—"
+        className="input input-numeric px-2 py-2"
+      />
+    </div>
+  );
+
   return (
-    <div className="max-w-5xl mx-auto p-6 bg-white shadow-md rounded-lg my-6 border">
-      <div className="border-b pb-4 mb-6 text-center">
-        <h1 className="text-2xl font-bold text-amber-950 uppercase tracking-wide">New Body Measurement Entry</h1>
+    <div className="mx-auto max-w-5xl space-y-6">
+      {/* Page header */}
+      <div className="card overflow-hidden">
+        <div className="bg-brass-sheen px-6 py-7 text-center">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200/25 bg-amber-100/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-amber-200">
+            <Ruler className="h-3 w-3" strokeWidth={2.5} />
+            New Entry
+          </span>
+          <h1 className="mt-3 font-display text-2xl font-extrabold uppercase tracking-[0.06em] text-amber-50">
+            New Body Measurement Entry
+          </h1>
+          <p className="mt-1.5 text-xs text-amber-200/70">
+            Look up an existing client to auto-fill their last recorded measurements.
+          </p>
+        </div>
       </div>
 
       {message.text && (
-        <div className={`p-4 mb-6 rounded text-sm font-semibold ${
-          message.type === 'error' ? 'bg-red-100 text-red-700' : 
-          message.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'
-        }`}>
-          {message.text}
+        <div
+          className={
+            message.type === 'error'
+              ? 'alert-error'
+              : message.type === 'success'
+              ? 'alert-success'
+              : 'alert-info'
+          }
+        >
+          <MessageIcon className="mt-px h-4 w-4 shrink-0" strokeWidth={2.5} />
+          <span>{message.text}</span>
         </div>
       )}
 
-      <form onSubmit={handleSubmitOrder}>
-        {/* Customer Lookup Header */}
-        <div className="mb-6 p-4 bg-amber-50/60 border border-amber-200 rounded">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <form onSubmit={handleSubmitOrder} className="space-y-6">
+        {/* ---------- Customer Lookup ---------- */}
+        <section className="card">
+          <div className="card-head flex items-center gap-3">
+            <span className="grid h-9 w-9 place-items-center rounded-xl bg-amber-100 text-amber-800">
+              <User className="h-[18px] w-[18px]" strokeWidth={2.2} />
+            </span>
             <div>
-              <label className="block text-xs font-bold text-amber-900 uppercase mb-1">Customer Phone *</label>
-              <div className="flex gap-2">
+              <h2 className="section-title">Customer Details</h2>
+              <p className="subtle">Search by phone to reuse an existing register</p>
+            </div>
+          </div>
+
+          <div className="card-body">
+            <div className="panel-warm grid grid-cols-1 gap-4 p-4 md:grid-cols-2">
+              <div>
+                <label className="label">Customer Phone *</label>
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    <Phone
+                      className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400"
+                      strokeWidth={2.2}
+                    />
+                    <input
+                      type="text"
+                      placeholder="Enter 10-digit number"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      className="input pl-10"
+                      required
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleSearchCustomer}
+                    disabled={loading}
+                    className="btn-accent shrink-0"
+                  >
+                    {loading ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" strokeWidth={2.5} />
+                    ) : (
+                      <Search className="h-3.5 w-3.5" strokeWidth={2.5} />
+                    )}
+                    Lookup
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="label">Customer Name *</label>
+                <div className="relative">
+                  <User
+                    className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400"
+                    strokeWidth={2.2}
+                  />
+                  <input
+                    type="text"
+                    placeholder="Enter customer name"
+                    value={customerName}
+                    onChange={(e) => setCustomerName(e.target.value)}
+                    className="input pl-10"
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ---------- Garment Options ---------- */}
+        <section className="card">
+          <div className="card-head flex items-center gap-3">
+            <span className="grid h-9 w-9 place-items-center rounded-xl bg-amber-100 text-amber-800">
+              <Shirt className="h-[18px] w-[18px]" strokeWidth={2.2} />
+            </span>
+            <div>
+              <h2 className="section-title">Garment Specification</h2>
+              <p className="subtle">What is being made, and in what colour</p>
+            </div>
+          </div>
+
+          <div className="card-body grid grid-cols-1 gap-4 md:grid-cols-3">
+            <div>
+              <label className="label">Category</label>
+              <select
+                value={mainCategory}
+                onChange={(e) => setMainCategory(e.target.value)}
+                className="select"
+              >
+                <option value="Indian">Indian</option>
+                <option value="Western">Western</option>
+                <option value="Indo-western">Indo-western</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="label">Sub-Category (Garment) *</label>
+              <input
+                type="text"
+                placeholder="e.g. Kurti, Suit, Lehenga"
+                value={subCategory}
+                onChange={(e) => setSubCategory(e.target.value)}
+                className="input"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="label">Colour</label>
+              <div className="relative">
+                <Palette
+                  className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400"
+                  strokeWidth={2.2}
+                />
                 <input
                   type="text"
-                  placeholder="Enter 10-digit number"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  className="border p-2 rounded w-full text-sm bg-white"
+                  placeholder="e.g. Royal Blue"
+                  value={colour}
+                  onChange={(e) => setColour(e.target.value)}
+                  className="input pl-10"
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ---------- 20 Measurement Sheet ---------- */}
+        <section className="card">
+          <div className="card-head flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <span className="grid h-9 w-9 place-items-center rounded-xl bg-amber-100 text-amber-800">
+                <Ruler className="h-[18px] w-[18px]" strokeWidth={2.2} />
+              </span>
+              <div>
+                <h2 className="section-title">20 Body Measurements</h2>
+                <p className="subtle">Values in inches · quarter-inch increments</p>
+              </div>
+            </div>
+            <span className={filledCount === 20 ? 'pill-green' : 'pill-neutral'}>
+              {filledCount} / 20 filled
+            </span>
+          </div>
+
+          <div className="card-body grid grid-cols-1 gap-x-10 gap-y-3 lg:grid-cols-2">
+            <div className="space-y-3 lg:border-r lg:border-stone-100 lg:pr-8">
+              {leftColumnFields.map(renderMeasureField)}
+            </div>
+            <div className="space-y-3">{rightColumnFields.map(renderMeasureField)}</div>
+          </div>
+        </section>
+
+        {/* ---------- Billing ---------- */}
+        <section className="card">
+          <div className="card-head flex items-center gap-3">
+            <span className="grid h-9 w-9 place-items-center rounded-xl bg-amber-100 text-amber-800">
+              <Receipt className="h-[18px] w-[18px]" strokeWidth={2.2} />
+            </span>
+            <div>
+              <h2 className="section-title">Billing & Instructions</h2>
+              <p className="subtle">Balance is calculated automatically</p>
+            </div>
+          </div>
+
+          <div className="card-body space-y-5">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+              <div>
+                <label className="label">Total Price (₹) *</label>
+                <input
+                  type="number"
+                  value={totalPrice}
+                  onChange={(e) => setTotalPrice(e.target.value)}
+                  className="input font-bold"
+                  placeholder="0"
                   required
                 />
-                <button
-                  type="button"
-                  onClick={handleSearchCustomer}
-                  disabled={loading}
-                  className="bg-amber-900 text-white px-4 py-2 text-sm font-semibold rounded hover:bg-amber-950"
-                >
-                  Lookup
-                </button>
+              </div>
+
+              <div>
+                <label className="label">Advance Paid (₹)</label>
+                <input
+                  type="number"
+                  value={advancePaid}
+                  onChange={(e) => setAdvancePaid(e.target.value)}
+                  className="input font-bold"
+                  placeholder="0"
+                />
+              </div>
+
+              <div>
+                <label className="label">Balance Remaining (₹)</label>
+                <input
+                  type="number"
+                  value={balanceDue >= 0 ? balanceDue : 0}
+                  disabled
+                  className="input font-extrabold text-amber-950"
+                />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-amber-900 uppercase mb-1">Customer Name *</label>
-              <input
-                type="text"
-                placeholder="Enter customer name"
-                value={customerName}
-                onChange={(e) => setCustomerName(e.target.value)}
-                className="border p-2 rounded w-full text-sm bg-white"
-                required
-              />
+              <label className="label">Special Instructions / Notes</label>
+              <textarea
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                className="input resize-y leading-relaxed"
+                placeholder="Anything the tailor should know — finish, lining, fit preference..."
+                rows="3"
+              ></textarea>
             </div>
           </div>
-        </div>
+        </section>
 
-        {/* Garment Options */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 p-4 border rounded bg-gray-50">
-          <div>
-            <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Category</label>
-            <select
-              value={mainCategory}
-              onChange={(e) => setMainCategory(e.target.value)}
-              className="border p-2 rounded w-full bg-white text-sm"
-            >
-              <option value="Indian">Indian</option>
-              <option value="Western">Western</option>
-              <option value="Indo-western">Indo-western</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Sub-Category (Garment) *</label>
-            <input
-              type="text"
-              placeholder="e.g. Kurti, Suit, Lehenga"
-              value={subCategory}
-              onChange={(e) => setSubCategory(e.target.value)}
-              className="border p-2 rounded w-full bg-white text-sm"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Colour</label>
-            <input
-              type="text"
-              placeholder="e.g. Royal Blue"
-              value={colour}
-              onChange={(e) => setColour(e.target.value)}
-              className="border p-2 rounded w-full bg-white text-sm"
-            />
-          </div>
-        </div>
-
-        {/* 20 Measurement Sheet */}
-        <div className="border rounded p-4 mb-6 bg-white">
-          <h3 className="text-sm font-bold text-amber-950 uppercase mb-4 border-b pb-2">20 Body Measurements</h3>
-          
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div className="space-y-2">
-              {leftColumnFields.map((field) => (
-                <div key={field.name} className="flex items-center gap-2">
-                  <span className="w-8 text-xs font-bold text-gray-400 text-right">{field.id}</span>
-                  <label className="w-32 text-xs font-semibold text-gray-700 uppercase">{field.label}</label>
-                  <input
-                    type="number"
-                    step="0.25"
-                    name={field.name}
-                    value={measurements[field.name]}
-                    onChange={handleMeasurementChange}
-                    className="border p-1.5 rounded w-full text-sm font-mono text-center"
-                  />
-                </div>
-              ))}
-            </div>
-
-            <div className="space-y-2">
-              {rightColumnFields.map((field) => (
-                <div key={field.name} className="flex items-center gap-2">
-                  <span className="w-8 text-xs font-bold text-gray-400 text-right">{field.id}</span>
-                  <label className="w-36 text-xs font-semibold text-gray-700 uppercase">{field.label}</label>
-                  <input
-                    type="number"
-                    step="0.25"
-                    name={field.name}
-                    value={measurements[field.name]}
-                    onChange={handleMeasurementChange}
-                    className="border p-1.5 rounded w-full text-sm font-mono text-center"
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Billing */}
-        <div className="p-4 border rounded bg-gray-50 mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-            <div>
-              <label className="block text-xs font-bold text-gray-600 mb-1">TOTAL PRICE (₹) *</label>
-              <input
-                type="number"
-                value={totalPrice}
-                onChange={(e) => setTotalPrice(e.target.value)}
-                className="border p-2 rounded w-full bg-white text-sm font-bold"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-gray-600 mb-1">ADVANCE PAID (₹)</label>
-              <input
-                type="number"
-                value={advancePaid}
-                onChange={(e) => setAdvancePaid(e.target.value)}
-                className="border p-2 rounded w-full bg-white text-sm font-bold"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-gray-600 mb-1">BALANCE REMAINING (₹)</label>
-              <input
-                type="number"
-                value={balanceDue >= 0 ? balanceDue : 0}
-                disabled
-                className="border p-2 rounded w-full bg-gray-200 text-sm font-extrabold text-amber-950"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold text-gray-600 mb-1">SPECIAL INSTRUCTIONS / NOTES</label>
-            <textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              className="border p-2 rounded w-full bg-white text-sm"
-              rows="3"
-            ></textarea>
-          </div>
-        </div>
-
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-amber-900 text-white font-bold py-3 rounded hover:bg-amber-950 disabled:bg-gray-400 text-sm uppercase"
-        >
-          {loading ? 'Processing...' : 'Save Order Record'}
+        <button type="submit" disabled={loading} className="btn-primary btn-block btn-lg">
+          {loading ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2.5} />
+              Processing...
+            </>
+          ) : (
+            <>
+              <Save className="h-4 w-4" strokeWidth={2.5} />
+              Save Order Record
+            </>
+          )}
         </button>
       </form>
     </div>

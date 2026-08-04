@@ -1,5 +1,17 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabaseClient';
+import {
+    UserPlus,
+    Users,
+    User,
+    Mail,
+    Lock,
+    Trash2,
+    Loader2,
+    AlertCircle,
+    CheckCircle2,
+    Inbox,
+} from '../../components/Icons';
 
 export default function CreateEmployee() {
     const [name, setName] = useState('');
@@ -65,102 +77,186 @@ export default function CreateEmployee() {
         }
     };
 
+    // Initials avatar for the staff table
+    const initials = (fullName) =>
+        String(fullName || '?')
+            .split(/[\s@._-]+/)
+            .filter(Boolean)
+            .slice(0, 2)
+            .map((w) => w[0]?.toUpperCase())
+            .join('');
+
     return (
-        <div className="max-w-4xl mx-auto space-y-8">
-            <div className="p-6 bg-white border rounded shadow-sm max-w-md mx-auto">
-                <h1 className="text-xl font-bold uppercase mb-4">Create Employee Account</h1>
+        <div className="mx-auto max-w-5xl space-y-6">
+            {message && (
+                <div className={message.type === 'success' ? 'alert-success' : 'alert-error'}>
+                    {message.type === 'success' ? (
+                        <CheckCircle2 className="mt-px h-4 w-4 shrink-0" strokeWidth={2.5} />
+                    ) : (
+                        <AlertCircle className="mt-px h-4 w-4 shrink-0" strokeWidth={2.5} />
+                    )}
+                    <span>{message.text}</span>
+                </div>
+            )}
 
-                {message && (
-                    <div
-                        className={`p-3 text-xs font-bold rounded mb-4 ${message.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                            }`}
-                    >
-                        {message.text}
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
+                {/* ---------- Create form ---------- */}
+                <div className="lg:col-span-2">
+                    <div className="card overflow-hidden lg:sticky lg:top-24">
+                        <div className="bg-brass-sheen px-6 py-6">
+                            <span className="grid h-11 w-11 place-items-center rounded-2xl bg-amber-100/10 ring-1 ring-amber-200/25">
+                                <UserPlus className="h-5 w-5 text-amber-200" strokeWidth={2.2} />
+                            </span>
+                            <h1 className="mt-3.5 font-display text-lg font-extrabold uppercase tracking-[0.05em] text-amber-50">
+                                Create Employee Account
+                            </h1>
+                            <p className="mt-1 text-xs text-amber-200/70">
+                                New staff can sign in immediately with these credentials.
+                            </p>
+                        </div>
+
+                        <div className="card-body">
+                            <form onSubmit={handleCreateEmployee} className="space-y-4">
+                                <div>
+                                    <label className="label">Employee Name *</label>
+                                    <div className="relative">
+                                        <User
+                                            className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400"
+                                            strokeWidth={2.2}
+                                        />
+                                        <input
+                                            type="text"
+                                            placeholder="e.g. John Doe"
+                                            value={name}
+                                            onChange={(e) => setName(e.target.value)}
+                                            className="input pl-10"
+                                            required
+                                        />
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label className="label">Employee Email *</label>
+                                    <div className="relative">
+                                        <Mail
+                                            className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400"
+                                            strokeWidth={2.2}
+                                        />
+                                        <input
+                                            type="email"
+                                            placeholder="worker@example.com"
+                                            value={email}
+                                            onChange={(e) => setEmail(e.target.value)}
+                                            className="input pl-10"
+                                            required
+                                        />
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label className="label">Password *</label>
+                                    <div className="relative">
+                                        <Lock
+                                            className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400"
+                                            strokeWidth={2.2}
+                                        />
+                                        <input
+                                            type="password"
+                                            placeholder="Minimum 6 characters"
+                                            value={password}
+                                            onChange={(e) => setPassword(e.target.value)}
+                                            className="input pl-10"
+                                            required
+                                            minLength={6}
+                                        />
+                                    </div>
+                                </div>
+
+                                <button type="submit" disabled={loading} className="btn-primary btn-block">
+                                    {loading ? (
+                                        <>
+                                            <Loader2 className="h-3.5 w-3.5 animate-spin" strokeWidth={2.5} />
+                                            Creating...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <UserPlus className="h-3.5 w-3.5" strokeWidth={2.5} />
+                                            Create Account
+                                        </>
+                                    )}
+                                </button>
+                            </form>
+                        </div>
                     </div>
-                )}
+                </div>
 
-                <form onSubmit={handleCreateEmployee} className="space-y-4">
-                    <div>
-                        <label className="block text-xs font-bold uppercase mb-1">Employee Name *</label>
-                        <input
-                            type="text"
-                            placeholder="e.g. John Doe"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                            className="border p-2 rounded w-full text-sm"
-                            required
-                        />
+                {/* ---------- Existing employees ---------- */}
+                <div className="lg:col-span-3">
+                    <div className="card overflow-hidden">
+                        <div className="card-head flex flex-wrap items-center justify-between gap-3">
+                            <div className="flex items-center gap-3">
+                                <span className="grid h-9 w-9 place-items-center rounded-xl bg-amber-100 text-amber-800">
+                                    <Users className="h-[18px] w-[18px]" strokeWidth={2.2} />
+                                </span>
+                                <div>
+                                    <h2 className="section-title">Existing Employees</h2>
+                                    <p className="subtle">Studio staff with account access</p>
+                                </div>
+                            </div>
+                            {employees.length > 0 && (
+                                <span className="pill-neutral">{employees.length} staff</span>
+                            )}
+                        </div>
+
+                        {employees.length === 0 ? (
+                            <div className="empty-state">
+                                <span className="grid h-12 w-12 place-items-center rounded-2xl bg-stone-100 text-stone-400">
+                                    <Inbox className="h-5 w-5" strokeWidth={2} />
+                                </span>
+                                <p className="text-sm font-bold text-stone-700">No employees found.</p>
+                                <p className="subtle">Create the first account using the form.</p>
+                            </div>
+                        ) : (
+                            <div className="table-wrap">
+                                <table className="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Email</th>
+                                            <th className="text-right">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {employees.map((emp) => (
+                                            <tr key={emp.id}>
+                                                <td>
+                                                    <div className="flex items-center gap-3">
+                                                        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-brass-sheen text-[11px] font-extrabold tracking-wide text-amber-100">
+                                                            {initials(emp.full_name || emp.email)}
+                                                        </span>
+                                                        <span className="font-semibold text-stone-900">
+                                                            {emp.full_name}
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                                <td className="text-stone-600">{emp.email}</td>
+                                                <td className="text-right">
+                                                    <button
+                                                        onClick={() => handleDeleteEmployee(emp.id, emp.full_name)}
+                                                        className="btn-danger btn-sm"
+                                                    >
+                                                        <Trash2 className="h-3 w-3" strokeWidth={2.5} />
+                                                        Delete
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
                     </div>
-
-                    <div>
-                        <label className="block text-xs font-bold uppercase mb-1">Employee Email *</label>
-                        <input
-                            type="email"
-                            placeholder="worker@example.com"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            className="border p-2 rounded w-full text-sm"
-                            required
-                        />
-                    </div>
-
-                    <div>
-                        <label className="block text-xs font-bold uppercase mb-1">Password *</label>
-                        <input
-                            type="password"
-                            placeholder="Minimum 6 characters"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            className="border p-2 rounded w-full text-sm"
-                            required
-                            minLength={6}
-                        />
-                    </div>
-
-                    <button
-                        type="submit"
-                        disabled={loading}
-                        className="w-full bg-amber-900 text-white text-xs font-bold py-2.5 rounded uppercase tracking-wider hover:bg-amber-800 disabled:bg-gray-400"
-                    >
-                        {loading ? 'Creating...' : 'Create Account'}
-                    </button>
-                </form>
-            </div>
-
-            <div className="p-6 bg-white border rounded shadow-sm">
-                <h2 className="text-lg font-bold uppercase mb-4">Existing Employees</h2>
-
-                {employees.length === 0 ? (
-                    <p className="text-sm text-gray-500">No employees found.</p>
-                ) : (
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left border-collapse">
-                            <thead>
-                                <tr className="border-b bg-gray-50 text-xs font-bold uppercase text-gray-600">
-                                    <th className="p-3">Name</th>
-                                    <th className="p-3">Email</th>
-                                    <th className="p-3 text-right">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {employees.map((emp) => (
-                                    <tr key={emp.id} className="border-b hover:bg-gray-50 text-sm">
-                                        <td className="p-3 font-semibold text-gray-800">{emp.full_name}</td>
-                                        <td className="p-3 text-gray-600">{emp.email}</td>
-                                        <td className="p-3 text-right">
-                                            <button
-                                                onClick={() => handleDeleteEmployee(emp.id, emp.full_name)}
-                                                className="bg-red-600 text-white text-xs font-bold px-3 py-1 rounded hover:bg-red-700 uppercase"
-                                            >
-                                                Delete
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                )}
+                </div>
             </div>
         </div>
     );

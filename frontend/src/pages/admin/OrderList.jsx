@@ -1,5 +1,18 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabaseClient';
+import {
+  Search,
+  Package,
+  TrendingUp,
+  Wallet,
+  Ruler,
+  Phone,
+  Inbox,
+  X,
+  FileText,
+  StickyNote,
+  Loader2,
+} from '../../components/Icons';
 
 const STATUS_COLOURS = {
   'Pending': 'bg-amber-100 text-amber-800 border-amber-300',
@@ -8,6 +21,59 @@ const STATUS_COLOURS = {
   'Ready': 'bg-emerald-100 text-emerald-800 border-emerald-300',
   'Delivered': 'bg-gray-100 text-gray-700 border-gray-300',
 };
+
+// Small accent used on the left edge of each stat card
+const STAT_ACCENT = {
+  amber: 'from-amber-700 to-amber-500',
+  ink: 'from-stone-700 to-stone-500',
+  red: 'from-red-700 to-red-500',
+};
+
+function StatCard({ label, value, suffix, Icon, tone = 'amber', valueClass }) {
+  return (
+    <div className="card card-hover relative overflow-hidden p-5">
+      <span
+        className={`absolute inset-y-0 left-0 w-1 bg-gradient-to-b ${STAT_ACCENT[tone]}`}
+        aria-hidden="true"
+      />
+      <div className="flex items-start justify-between gap-4 pl-2">
+        <div className="min-w-0">
+          <p className="eyebrow">{label}</p>
+          <p className={`mt-2 font-display text-2xl sm:text-[28px] font-extrabold leading-none tracking-tight ${valueClass}`}>
+            {value}
+            {suffix && (
+              <span className="ml-1.5 text-xs font-semibold tracking-normal text-stone-400">
+                {suffix}
+              </span>
+            )}
+          </p>
+        </div>
+        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-stone-100 text-stone-500">
+          <Icon className="h-[18px] w-[18px]" strokeWidth={2.2} />
+        </span>
+      </div>
+    </div>
+  );
+}
+
+// One row of the measurement sheet in the modal
+function MeasureRow({ index, label, value }) {
+  return (
+    <div className="flex items-baseline justify-between gap-3 border-b border-dashed border-stone-200 py-1.5 last:border-b-0">
+      <span className="flex items-baseline gap-2 text-[11px] font-semibold uppercase tracking-wide text-stone-500">
+        <span className="w-5 text-right font-mono text-[10px] text-stone-300">{index}</span>
+        {label}
+      </span>
+      <span
+        className={`font-mono text-sm font-bold tabular-nums ${
+          value || value === 0 ? 'text-stone-900' : 'text-stone-300'
+        }`}
+      >
+        {value || value === 0 ? value : '—'}
+      </span>
+    </div>
+  );
+}
 
 export default function OrderList() {
   const [orders, setOrders] = useState([]);
@@ -73,91 +139,144 @@ export default function OrderList() {
   );
   const activeOrdersCount = orders.filter((o) => o.status !== 'Delivered').length;
 
+  const leftMeasurements = [
+    ['CHEST', 'chest'],
+    ['L CHEST', 'l_chest'],
+    ['LENGTH', 'length'],
+    ['WAIST', 'waist'],
+    ['NECK FRONT', 'neck_front'],
+    ['NECK BACK', 'neck_back'],
+    ['ARMHOLE', 'armhole'],
+    ['SHOULDER', 'shoulder'],
+    ['DART POINT', 'dart_point'],
+    ['SLEEVE', 'sleeve'],
+  ];
+
+  const rightMeasurements = [
+    ['SLEEVE CIRCUM', 'sleeve_circum'],
+    ['BICEP', 'bicep'],
+    ['THIGHS', 'thighs'],
+    ['B. LENGTH', 'b_length'],
+    ['B. WAIST', 'b_waist'],
+    ['HIPS', 'hips'],
+    ['CROTCH', 'crotch'],
+    ['KNEE', 'knee'],
+    ['B. CIRCUM', 'b_circum'],
+    ['OTHERS', 'others'],
+  ];
+
   return (
     <div className="space-y-6">
       {/* Top Business Analytics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-200">
-          <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Active Work In Progress</p>
-          <p className="text-2xl font-black text-amber-900 mt-1">{activeOrdersCount} <span className="text-sm font-normal text-gray-500">Orders</span></p>
-        </div>
-        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-200">
-          <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Total Sales Volume</p>
-          <p className="text-2xl font-black text-gray-900 mt-1">₹{totalRevenue.toLocaleString('en-IN')}</p>
-        </div>
-        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-200">
-          <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Outstanding Customer Balance</p>
-          <p className="text-2xl font-black text-red-600 mt-1">₹{totalPendingBalance.toLocaleString('en-IN')}</p>
-        </div>
+        <StatCard
+          label="Active Work In Progress"
+          value={activeOrdersCount}
+          suffix="Orders"
+          Icon={Package}
+          tone="amber"
+          valueClass="text-amber-900"
+        />
+        <StatCard
+          label="Total Sales Volume"
+          value={`₹${totalRevenue.toLocaleString('en-IN')}`}
+          Icon={TrendingUp}
+          tone="ink"
+          valueClass="text-stone-900"
+        />
+        <StatCard
+          label="Outstanding Customer Balance"
+          value={`₹${totalPendingBalance.toLocaleString('en-IN')}`}
+          Icon={Wallet}
+          tone="red"
+          valueClass="text-red-600"
+        />
       </div>
 
       {/* Main Table Container */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        <div className="p-5 border-b border-gray-100 flex flex-col md:flex-row justify-between items-center gap-4">
+      <div className="card overflow-hidden">
+        <div className="card-head flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h2 className="text-xl font-extrabold text-amber-950 tracking-wide uppercase">Bespoke Orders Register</h2>
-            <p className="text-xs text-gray-500 mt-0.5">Track production progress, payments, and body measurements</p>
+            <h2 className="page-title">Bespoke Orders Register</h2>
+            <p className="subtle mt-1">
+              Track production progress, payments, and body measurements
+            </p>
           </div>
-          <input
-            type="text"
-            placeholder="🔍 Search name, phone, or garment..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="border border-gray-300 px-4 py-2 rounded-lg w-full md:w-80 text-sm focus:outline-none focus:ring-2 focus:ring-amber-800"
-          />
+          <div className="relative w-full md:w-80">
+            <Search
+              className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400"
+              strokeWidth={2.2}
+            />
+            <input
+              type="text"
+              placeholder="Search name, phone, or garment..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="input pl-10"
+            />
+          </div>
         </div>
 
         {loading ? (
-          <div className="p-12 text-center text-gray-500 font-semibold animate-pulse">
-            Fetching studio orders...
+          <div className="empty-state">
+            <Loader2 className="h-6 w-6 animate-spin text-amber-800" strokeWidth={2.5} />
+            <p className="text-sm font-semibold text-stone-500">Fetching studio orders...</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-gray-50 text-gray-600 text-xs uppercase font-bold tracking-wider border-b">
+          <div className="table-wrap">
+            <table className="table">
+              <thead>
                 <tr>
-                  <th className="p-4">Date</th>
-                  <th className="p-4">Customer</th>
-                  <th className="p-4">Garment</th>
-                  <th className="p-4">Status</th>
-                  <th className="p-4">Financials</th>
-                  <th className="p-4 text-center">Action</th>
+                  <th>Date</th>
+                  <th>Customer</th>
+                  <th>Garment</th>
+                  <th>Status</th>
+                  <th>Financials</th>
+                  <th className="text-center">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody>
                 {filteredOrders.length === 0 ? (
-                  <tr>
-                    <td colSpan="6" className="p-8 text-center text-gray-500">
-                      No matching records found.
+                  <tr className="hover:bg-transparent">
+                    <td colSpan="6">
+                      <div className="empty-state">
+                        <span className="grid h-12 w-12 place-items-center rounded-2xl bg-stone-100 text-stone-400">
+                          <Inbox className="h-5 w-5" strokeWidth={2} />
+                        </span>
+                        <p className="text-sm font-bold text-stone-700">No matching records found.</p>
+                        <p className="subtle">
+                          {search ? 'Try a different name, phone, or garment.' : 'New orders will appear here.'}
+                        </p>
+                      </div>
                     </td>
                   </tr>
                 ) : (
                   filteredOrders.map((order) => {
                     const balance = (order.total_price || 0) - (order.advance_paid || 0);
                     return (
-                      <tr key={order.id} className="hover:bg-amber-50/30 transition-colors">
-                        <td className="p-4 text-xs font-mono text-gray-500">
+                      <tr key={order.id} className="group">
+                        <td className="whitespace-nowrap font-mono text-xs text-stone-500">
                           {new Date(order.created_at).toLocaleDateString('en-IN', {
                             day: '2-digit',
                             month: 'short',
                             year: 'numeric'
                           })}
                         </td>
-                        <td className="p-4">
-                          <p className="font-bold text-gray-900">{order.customers?.name || 'N/A'}</p>
-                          <p className="text-xs text-gray-500 font-mono">{order.customers?.phone || 'N/A'}</p>
+                        <td>
+                          <p className="font-bold text-stone-900">{order.customers?.name || 'N/A'}</p>
+                          <p className="mt-0.5 font-mono text-xs text-stone-500">
+                            {order.customers?.phone || 'N/A'}
+                          </p>
                         </td>
-                        <td className="p-4">
-                          <p className="font-semibold text-gray-800">{order.sub_category}</p>
-                          <span className="text-xs text-gray-500">{order.main_category}</span>
+                        <td>
+                          <p className="font-semibold text-stone-800">{order.sub_category}</p>
+                          <span className="text-xs text-stone-500">{order.main_category}</span>
                         </td>
-                        <td className="p-4">
+                        <td>
                           <select
                             value={order.status || 'Pending'}
                             onChange={(e) => handleStatusChange(order.id, e.target.value)}
-                            className={`text-xs font-bold px-2.5 py-1 rounded-full border cursor-pointer ${
-                              STATUS_COLOURS[order.status || 'Pending']
-                            }`}
+                            className={`pill-select ${STATUS_COLOURS[order.status || 'Pending']}`}
                           >
                             <option value="Pending">Pending</option>
                             <option value="In Cutting">In Cutting</option>
@@ -166,17 +285,24 @@ export default function OrderList() {
                             <option value="Delivered">Delivered</option>
                           </select>
                         </td>
-                        <td className="p-4 text-xs space-y-0.5">
-                          <div>Total: <span className="font-bold">₹{order.total_price}</span></div>
-                          <div className={balance > 0 ? 'text-red-600 font-bold' : 'text-emerald-700 font-semibold'}>
+                        <td className="whitespace-nowrap text-xs">
+                          <div className="font-semibold text-stone-600">
+                            Total: <span className="font-bold text-stone-900">₹{order.total_price}</span>
+                          </div>
+                          <div
+                            className={`mt-1 font-bold ${
+                              balance > 0 ? 'text-red-600' : 'text-emerald-700'
+                            }`}
+                          >
                             {balance > 0 ? `Due: ₹${balance}` : 'Paid in Full'}
                           </div>
                         </td>
-                        <td className="p-4 text-center">
+                        <td className="text-center">
                           <button
                             onClick={() => setSelectedOrder(order)}
-                            className="bg-amber-900 hover:bg-amber-950 text-white text-xs px-3 py-1.5 rounded-md font-semibold tracking-wide transition-colors"
+                            className="btn-primary btn-sm"
                           >
+                            <Ruler className="h-3.5 w-3.5" strokeWidth={2.5} />
                             View Register
                           </button>
                         </td>
@@ -192,42 +318,52 @@ export default function OrderList() {
 
       {/* Measurement Register Modal */}
       {selectedOrder && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto border border-gray-100">
-            <div className="p-6 bg-amber-950 text-white flex justify-between items-start rounded-t-2xl">
-              <div>
-                <span className="text-xs bg-amber-800 text-amber-200 px-2 py-0.5 rounded font-mono font-bold uppercase tracking-wider">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-stone-950/60 p-4 backdrop-blur-sm animate-fade-in">
+          <div className="card max-h-[90vh] w-full max-w-3xl overflow-y-auto shadow-pop animate-pop-in">
+            {/* Modal header */}
+            <div className="sticky top-0 z-10 flex items-start justify-between gap-4 rounded-t-2xl bg-brass-sheen p-6 text-white">
+              <div className="min-w-0">
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200/25 bg-amber-100/10 px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-amber-200">
+                  <FileText className="h-3 w-3" strokeWidth={2.5} />
                   Order Register
                 </span>
-                <h3 className="text-2xl font-black text-amber-100 mt-1">{selectedOrder.customers?.name}</h3>
-                <p className="text-xs text-amber-300 font-mono">{selectedOrder.customers?.phone}</p>
+                <h3 className="mt-2 truncate font-display text-2xl font-extrabold text-amber-50">
+                  {selectedOrder.customers?.name}
+                </h3>
+                <p className="mt-1 flex items-center gap-1.5 font-mono text-xs text-amber-200/70">
+                  <Phone className="h-3 w-3" strokeWidth={2.5} />
+                  {selectedOrder.customers?.phone}
+                </p>
               </div>
               <button
                 onClick={() => setSelectedOrder(null)}
-                className="text-amber-300 hover:text-white font-bold text-2xl"
+                aria-label="Close register"
+                className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-amber-200/20 bg-amber-100/5 text-amber-200 transition-colors hover:bg-amber-100/15 hover:text-white"
               >
-                ✕
+                <X className="h-4 w-4" strokeWidth={2.5} />
               </button>
             </div>
 
-            <div className="p-6 space-y-6">
+            <div className="space-y-6 p-6">
               {/* Garment Details & Status */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-amber-50/50 p-4 rounded-xl border border-amber-100 text-xs">
+              <div className="panel-warm grid grid-cols-2 gap-4 p-4 md:grid-cols-4">
                 <div>
-                  <p className="text-gray-500 font-medium">Garment Type</p>
-                  <p className="font-bold text-amber-950 text-sm mt-0.5">{selectedOrder.sub_category}</p>
+                  <p className="eyebrow">Garment Type</p>
+                  <p className="mt-1 text-sm font-bold text-amber-950">{selectedOrder.sub_category}</p>
                 </div>
                 <div>
-                  <p className="text-gray-500 font-medium">Category</p>
-                  <p className="font-bold text-amber-950 text-sm mt-0.5">{selectedOrder.main_category}</p>
+                  <p className="eyebrow">Category</p>
+                  <p className="mt-1 text-sm font-bold text-amber-950">{selectedOrder.main_category}</p>
                 </div>
                 <div>
-                  <p className="text-gray-500 font-medium">Colour Spec</p>
-                  <p className="font-bold text-amber-950 text-sm mt-0.5">{selectedOrder.colour || 'N/A'}</p>
+                  <p className="eyebrow">Colour Spec</p>
+                  <p className="mt-1 text-sm font-bold text-amber-950">{selectedOrder.colour || 'N/A'}</p>
                 </div>
                 <div>
-                  <p className="text-gray-500 font-medium">Production Status</p>
-                  <span className={`inline-block mt-0.5 text-xs font-bold px-2 py-0.5 rounded-full border ${STATUS_COLOURS[selectedOrder.status || 'Pending']}`}>
+                  <p className="eyebrow">Production Status</p>
+                  <span
+                    className={`pill mt-1.5 ${STATUS_COLOURS[selectedOrder.status || 'Pending']}`}
+                  >
                     {selectedOrder.status || 'Pending'}
                   </span>
                 </div>
@@ -235,57 +371,60 @@ export default function OrderList() {
 
               {/* 20-Point Measurement Sheet */}
               <div>
-                <h4 className="text-xs font-extrabold text-gray-500 uppercase tracking-wider mb-3">20-Point Tailoring Measurement Sheet</h4>
-                <div className="grid grid-cols-2 gap-x-6 gap-y-2 bg-gray-50 p-4 rounded-xl border border-gray-200 text-xs font-mono">
-                  <div className="space-y-2 border-r border-gray-200 pr-4">
-                    <div className="flex justify-between border-b border-gray-200/60 pb-1"><span>1. CHEST</span> <span className="font-bold text-gray-900">{selectedOrder.chest || '-'}</span></div>
-                    <div className="flex justify-between border-b border-gray-200/60 pb-1"><span>2. L CHEST</span> <span className="font-bold text-gray-900">{selectedOrder.l_chest || '-'}</span></div>
-                    <div className="flex justify-between border-b border-gray-200/60 pb-1"><span>3. LENGTH</span> <span className="font-bold text-gray-900">{selectedOrder.length || '-'}</span></div>
-                    <div className="flex justify-between border-b border-gray-200/60 pb-1"><span>4. WAIST</span> <span className="font-bold text-gray-900">{selectedOrder.waist || '-'}</span></div>
-                    <div className="flex justify-between border-b border-gray-200/60 pb-1"><span>5. NECK FRONT</span> <span className="font-bold text-gray-900">{selectedOrder.neck_front || '-'}</span></div>
-                    <div className="flex justify-between border-b border-gray-200/60 pb-1"><span>6. NECK BACK</span> <span className="font-bold text-gray-900">{selectedOrder.neck_back || '-'}</span></div>
-                    <div className="flex justify-between border-b border-gray-200/60 pb-1"><span>7. ARMHOLE</span> <span className="font-bold text-gray-900">{selectedOrder.armhole || '-'}</span></div>
-                    <div className="flex justify-between border-b border-gray-200/60 pb-1"><span>8. SHOULDER</span> <span className="font-bold text-gray-900">{selectedOrder.shoulder || '-'}</span></div>
-                    <div className="flex justify-between border-b border-gray-200/60 pb-1"><span>9. DART POINT</span> <span className="font-bold text-gray-900">{selectedOrder.dart_point || '-'}</span></div>
-                    <div className="flex justify-between"><span>10. SLEEVE</span> <span className="font-bold text-gray-900">{selectedOrder.sleeve || '-'}</span></div>
+                <h4 className="eyebrow mb-3 flex items-center gap-2">
+                  <Ruler className="h-3.5 w-3.5" strokeWidth={2.5} />
+                  20-Point Tailoring Measurement Sheet
+                </h4>
+                <div className="panel-muted grid grid-cols-1 gap-x-8 p-4 sm:grid-cols-2">
+                  <div className="sm:border-r sm:border-stone-200 sm:pr-6">
+                    {leftMeasurements.map(([label, key], i) => (
+                      <MeasureRow key={key} index={i + 1} label={label} value={selectedOrder[key]} />
+                    ))}
                   </div>
-
-                  <div className="space-y-2">
-                    <div className="flex justify-between border-b border-gray-200/60 pb-1"><span>11. SLEEVE CIRCUM</span> <span className="font-bold text-gray-900">{selectedOrder.sleeve_circum || '-'}</span></div>
-                    <div className="flex justify-between border-b border-gray-200/60 pb-1"><span>12. BICEP</span> <span className="font-bold text-gray-900">{selectedOrder.bicep || '-'}</span></div>
-                    <div className="flex justify-between border-b border-gray-200/60 pb-1"><span>13. THIGHS</span> <span className="font-bold text-gray-900">{selectedOrder.thighs || '-'}</span></div>
-                    <div className="flex justify-between border-b border-gray-200/60 pb-1"><span>14. B. LENGTH</span> <span className="font-bold text-gray-900">{selectedOrder.b_length || '-'}</span></div>
-                    <div className="flex justify-between border-b border-gray-200/60 pb-1"><span>15. B. WAIST</span> <span className="font-bold text-gray-900">{selectedOrder.b_waist || '-'}</span></div>
-                    <div className="flex justify-between border-b border-gray-200/60 pb-1"><span>16. HIPS</span> <span className="font-bold text-gray-900">{selectedOrder.hips || '-'}</span></div>
-                    <div className="flex justify-between border-b border-gray-200/60 pb-1"><span>17. CROTCH</span> <span className="font-bold text-gray-900">{selectedOrder.crotch || '-'}</span></div>
-                    <div className="flex justify-between border-b border-gray-200/60 pb-1"><span>18. KNEE</span> <span className="font-bold text-gray-900">{selectedOrder.knee || '-'}</span></div>
-                    <div className="flex justify-between border-b border-gray-200/60 pb-1"><span>19. B. CIRCUM</span> <span className="font-bold text-gray-900">{selectedOrder.b_circum || '-'}</span></div>
-                    <div className="flex justify-between"><span>20. OTHERS</span> <span className="font-bold text-gray-900">{selectedOrder.others || '-'}</span></div>
+                  <div className="sm:pl-2">
+                    {rightMeasurements.map(([label, key], i) => (
+                      <MeasureRow key={key} index={i + 11} label={label} value={selectedOrder[key]} />
+                    ))}
                   </div>
                 </div>
               </div>
 
-              {/* Special Instructions & Financial Summary */}
-              <div className="bg-gray-50 p-4 rounded-xl border border-gray-200 space-y-3 text-xs">
-                <div>
-                  <p className="font-bold text-gray-700">Special Notes / Tailor Instructions:</p>
-                  <p className="text-gray-600 mt-1 italic">{selectedOrder.notes || 'No special instructions recorded.'}</p>
+              {/* Special Instructions */}
+              <div className="panel-muted p-4">
+                <p className="eyebrow flex items-center gap-2">
+                  <StickyNote className="h-3.5 w-3.5" strokeWidth={2.5} />
+                  Special Notes / Tailor Instructions
+                </p>
+                <p className="mt-2 text-sm italic leading-relaxed text-stone-600">
+                  {selectedOrder.notes || 'No special instructions recorded.'}
+                </p>
+              </div>
+
+              {/* Financial Summary */}
+              <div className="grid grid-cols-3 gap-3">
+                <div className="rounded-xl border border-stone-200 bg-white p-3.5 text-center">
+                  <p className="eyebrow">Total</p>
+                  <p className="mt-1.5 font-display text-lg font-extrabold text-stone-900">
+                    ₹{selectedOrder.total_price}
+                  </p>
                 </div>
-                <div className="pt-3 border-t border-gray-200 flex justify-between items-center font-bold text-sm">
-                  <span>Total: ₹{selectedOrder.total_price}</span>
-                  <span className="text-emerald-700">Advance: ₹{selectedOrder.advance_paid || 0}</span>
-                  <span className="text-red-600">
-                    Remaining: ₹{(selectedOrder.total_price || 0) - (selectedOrder.advance_paid || 0)}
-                  </span>
+                <div className="rounded-xl border border-emerald-200 bg-emerald-50/60 p-3.5 text-center">
+                  <p className="eyebrow text-emerald-700/70">Advance</p>
+                  <p className="mt-1.5 font-display text-lg font-extrabold text-emerald-700">
+                    ₹{selectedOrder.advance_paid || 0}
+                  </p>
+                </div>
+                <div className="rounded-xl border border-red-200 bg-red-50/60 p-3.5 text-center">
+                  <p className="eyebrow text-red-700/70">Remaining</p>
+                  <p className="mt-1.5 font-display text-lg font-extrabold text-red-600">
+                    ₹{(selectedOrder.total_price || 0) - (selectedOrder.advance_paid || 0)}
+                  </p>
                 </div>
               </div>
             </div>
 
-            <div className="p-4 bg-gray-50 border-t rounded-b-2xl">
-              <button
-                onClick={() => setSelectedOrder(null)}
-                className="w-full bg-amber-950 text-white font-bold py-2.5 rounded-xl hover:bg-black transition-colors text-xs uppercase tracking-wider"
-              >
+            <div className="sticky bottom-0 rounded-b-2xl border-t border-stone-200 bg-stone-50/95 p-4 backdrop-blur">
+              <button onClick={() => setSelectedOrder(null)} className="btn-primary btn-block">
                 Close Register
               </button>
             </div>

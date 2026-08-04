@@ -1,5 +1,19 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabaseClient';
+import {
+    Bell,
+    Plus,
+    X,
+    ChevronDown,
+    ChevronUp,
+    ListChecks,
+    CheckCircle2,
+    AlertCircle,
+    Loader2,
+    Users,
+    Filter,
+    Inbox,
+} from '../../components/Icons';
 
 export default function TaskManagement() {
     const [employees, setEmployees] = useState([]);
@@ -212,14 +226,35 @@ export default function TaskManagement() {
 
     const availableMonths = Array.from(new Set(taskList.map((t) => t.month_key))).filter(Boolean);
 
+    // Status pill styling shared by the table
+    const statusPillClass = (status) =>
+        status === 'Completed'
+            ? 'pill-green'
+            : status === 'Under Review'
+                ? 'pill-amber'
+                : 'pill-blue';
+
+    // Initials avatar for each worker row
+    const initials = (fullName) =>
+        fullName
+            .split(/[\s@._-]+/)
+            .filter(Boolean)
+            .slice(0, 2)
+            .map((w) => w[0]?.toUpperCase())
+            .join('');
+
     return (
-        <div className="max-w-5xl mx-auto space-y-6">
+        <div className="mx-auto max-w-5xl space-y-6">
             {/* IN-APP NOTIFICATIONS */}
             {notifications.length > 0 && (
-                <div className="bg-amber-50 border border-amber-300 p-4 rounded-xl space-y-2">
-                    <div className="flex justify-between items-center">
-                        <span className="text-xs font-black uppercase text-amber-900 tracking-wider flex items-center gap-2">
-                            <span className="w-2 h-2 rounded-full bg-amber-600 animate-ping"></span>
+                <div className="panel-warm space-y-2.5 p-4">
+                    <div className="flex items-center justify-between">
+                        <span className="flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-[0.12em] text-amber-900">
+                            <span className="relative flex h-2 w-2">
+                                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-500 opacity-75"></span>
+                                <span className="relative inline-flex h-2 w-2 rounded-full bg-amber-600"></span>
+                            </span>
+                            <Bell className="h-3.5 w-3.5" strokeWidth={2.5} />
                             Admin Notifications ({notifications.length})
                         </span>
                     </div>
@@ -227,15 +262,15 @@ export default function TaskManagement() {
                         {notifications.map((n) => (
                             <div
                                 key={n.id}
-                                className="bg-white p-2.5 rounded-lg border border-amber-200 flex justify-between items-center text-xs"
+                                className="flex items-center justify-between gap-4 rounded-xl border border-amber-200/80 bg-white px-3.5 py-2.5 text-xs shadow-sm"
                             >
-                                <div>
-                                    <span className="font-bold text-gray-900">{n.title}: </span>
-                                    <span className="text-gray-600">{n.message}</span>
+                                <div className="min-w-0">
+                                    <span className="font-bold text-stone-900">{n.title}: </span>
+                                    <span className="text-stone-600">{n.message}</span>
                                 </div>
                                 <button
                                     onClick={() => markNotificationRead(n.id)}
-                                    className="text-[10px] font-bold text-amber-900 hover:underline uppercase ml-4"
+                                    className="shrink-0 rounded-lg px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-amber-900 transition-colors hover:bg-amber-100"
                                 >
                                     Dismiss
                                 </button>
@@ -246,127 +281,153 @@ export default function TaskManagement() {
             )}
 
             {/* TOP HEADER */}
-            <div className="flex justify-between items-center bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
-                <div>
-                    <h1 className="text-xl font-black uppercase text-amber-950">Task Operations</h1>
-                    <p className="text-xs text-gray-500 font-medium">Manage worker assignments and audits</p>
+            <div className="card flex flex-wrap items-center justify-between gap-4 p-5">
+                <div className="flex items-center gap-3">
+                    <span className="grid h-11 w-11 place-items-center rounded-2xl bg-brass-sheen text-amber-200">
+                        <ListChecks className="h-5 w-5" strokeWidth={2.2} />
+                    </span>
+                    <div>
+                        <h1 className="page-title">Task Operations</h1>
+                        <p className="subtle mt-0.5">Manage worker assignments and audits</p>
+                    </div>
                 </div>
                 <button
                     onClick={() => setShowAssignForm(!showAssignForm)}
-                    className="bg-amber-950 hover:bg-amber-900 text-white font-bold text-xs uppercase px-4 py-2.5 rounded-lg transition-colors"
+                    className={showAssignForm ? 'btn-outline' : 'btn-primary'}
                 >
-                    {showAssignForm ? '✕ Close Form' : '+ Assign New Task'}
+                    {showAssignForm ? (
+                        <>
+                            <X className="h-3.5 w-3.5" strokeWidth={2.5} />
+                            Close Form
+                        </>
+                    ) : (
+                        <>
+                            <Plus className="h-3.5 w-3.5" strokeWidth={2.5} />
+                            Assign New Task
+                        </>
+                    )}
                 </button>
             </div>
 
             {/* COLLAPSIBLE ASSIGN TASK FORM */}
             {showAssignForm && (
-                <div className="bg-white p-6 rounded-xl shadow-md border border-gray-200 transition-all">
-                    <h2 className="text-lg font-black uppercase text-amber-950 mb-4">
-                        Assign New Task
-                    </h2>
+                <div className="card animate-rise-in">
+                    <div className="card-head">
+                        <h2 className="section-title">Assign New Task</h2>
+                        <p className="subtle mt-0.5">Link work to a worker, and optionally to an order</p>
+                    </div>
 
-                    {message.text && (
-                        <div
-                            className={`p-3 rounded-lg text-xs font-bold mb-4 ${message.type === 'error'
-                                    ? 'bg-red-100 text-red-700'
-                                    : 'bg-green-100 text-green-700'
-                                }`}
-                        >
-                            {message.text}
-                        </div>
-                    )}
+                    <div className="card-body">
+                        {message.text && (
+                            <div className={`mb-4 ${message.type === 'error' ? 'alert-error' : 'alert-success'}`}>
+                                {message.type === 'error' ? (
+                                    <AlertCircle className="mt-px h-4 w-4 shrink-0" strokeWidth={2.5} />
+                                ) : (
+                                    <CheckCircle2 className="mt-px h-4 w-4 shrink-0" strokeWidth={2.5} />
+                                )}
+                                <span>{message.text}</span>
+                            </div>
+                        )}
 
-                    <form onSubmit={handleAssignTask} className="space-y-4">
-                        <div>
-                            <label className="block text-xs font-bold uppercase mb-1">
-                                Select Worker *
-                            </label>
-                            <select
-                                value={selectedEmployee}
-                                onChange={(e) => setSelectedEmployee(e.target.value)}
-                                className="w-full border border-gray-300 p-2.5 rounded-lg text-sm bg-gray-50 focus:bg-white"
-                                required
-                            >
-                                <option value="">-- Choose Worker --</option>
-                                {employees.map((emp) => (
-                                    <option key={emp.id} value={emp.id}>
-                                        {(emp.full_name && emp.full_name.trim() !== '') ? emp.full_name : emp.email}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
+                        <form onSubmit={handleAssignTask} className="space-y-4">
+                            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                                <div>
+                                    <label className="label">Select Worker *</label>
+                                    <select
+                                        value={selectedEmployee}
+                                        onChange={(e) => setSelectedEmployee(e.target.value)}
+                                        className="select"
+                                        required
+                                    >
+                                        <option value="">-- Choose Worker --</option>
+                                        {employees.map((emp) => (
+                                            <option key={emp.id} value={emp.id}>
+                                                {(emp.full_name && emp.full_name.trim() !== '') ? emp.full_name : emp.email}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
 
-                        <div>
-                            <label className="block text-xs font-bold uppercase mb-1">
-                                Select Order (Optional)
-                            </label>
-                            <select
-                                value={selectedOrder}
-                                onChange={(e) => setSelectedOrder(e.target.value)}
-                                className="w-full border border-gray-300 p-2.5 rounded-lg text-sm bg-gray-50 focus:bg-white"
-                            >
-                                <option value="">-- No Order Linked --</option>
-                                {orders.map((ord) => (
-                                    <option key={ord.id} value={ord.id}>
-                                        {ord.order_number ? `#${ord.order_number} - ` : ''}
-                                        {ord.customer_name || ord.client_name || `Order ${ord.id.slice(0, 8)}`}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
+                                <div>
+                                    <label className="label">Select Order (Optional)</label>
+                                    <select
+                                        value={selectedOrder}
+                                        onChange={(e) => setSelectedOrder(e.target.value)}
+                                        className="select"
+                                    >
+                                        <option value="">-- No Order Linked --</option>
+                                        {orders.map((ord) => (
+                                            <option key={ord.id} value={ord.id}>
+                                                {ord.order_number ? `#${ord.order_number} - ` : ''}
+                                                {ord.customer_name || ord.client_name || `Order ${ord.id.slice(0, 8)}`}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
 
-                        <div>
-                            <label className="block text-xs font-bold uppercase mb-1">
-                                Task Details *
-                            </label>
-                            <textarea
-                                value={taskDetails}
-                                onChange={(e) => setTaskDetails(e.target.value)}
-                                placeholder="Describe the work to be done..."
-                                className="w-full border border-gray-300 p-2.5 rounded-lg text-sm h-24 bg-gray-50 focus:bg-white"
-                                required
-                            />
-                        </div>
+                            <div>
+                                <label className="label">Task Details *</label>
+                                <textarea
+                                    value={taskDetails}
+                                    onChange={(e) => setTaskDetails(e.target.value)}
+                                    placeholder="Describe the work to be done..."
+                                    className="input h-24 resize-y leading-relaxed"
+                                    required
+                                />
+                            </div>
 
-                        <div className="flex justify-end gap-3">
-                            <button
-                                type="button"
-                                onClick={() => setShowAssignForm(false)}
-                                className="px-4 py-2.5 text-xs font-bold uppercase text-gray-500 hover:bg-gray-100 rounded-lg"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                type="submit"
-                                disabled={loading}
-                                className="bg-amber-950 text-white font-bold py-2.5 px-6 rounded-lg text-xs uppercase tracking-wider hover:bg-amber-900 transition-colors disabled:opacity-50"
-                            >
-                                {loading ? 'Assigning Task...' : 'Confirm Assignment'}
-                            </button>
-                        </div>
-                    </form>
+                            <div className="flex justify-end gap-3 border-t border-stone-100 pt-4">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowAssignForm(false)}
+                                    className="btn-ghost"
+                                >
+                                    Cancel
+                                </button>
+                                <button type="submit" disabled={loading} className="btn-primary">
+                                    {loading ? (
+                                        <>
+                                            <Loader2 className="h-3.5 w-3.5 animate-spin" strokeWidth={2.5} />
+                                            Assigning Task...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <CheckCircle2 className="h-3.5 w-3.5" strokeWidth={2.5} />
+                                            Confirm Assignment
+                                        </>
+                                    )}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             )}
 
             {/* WORKER-GROUPED TASK HISTORY */}
-            <div className="bg-white p-6 rounded-xl shadow-md border border-gray-200 space-y-6">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-200 pb-4">
-                    <div>
-                        <h2 className="text-lg font-black uppercase text-amber-950">
-                            Worker Work History
-                        </h2>
-                        <p className="text-xs text-gray-500 font-medium mt-0.5">
-                            Click a worker to view or approve their assigned tasks.
-                        </p>
+            <div className="card">
+                <div className="card-head flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+                    <div className="flex items-center gap-3">
+                        <span className="grid h-9 w-9 place-items-center rounded-xl bg-amber-100 text-amber-800">
+                            <Users className="h-[18px] w-[18px]" strokeWidth={2.2} />
+                        </span>
+                        <div>
+                            <h2 className="section-title">Worker Work History</h2>
+                            <p className="subtle mt-0.5">
+                                Click a worker to view or approve their assigned tasks.
+                            </p>
+                        </div>
                     </div>
 
-                    <div className="flex items-center gap-3">
-                        <label className="text-xs font-bold uppercase text-gray-500">Filter Month:</label>
+                    <div className="flex items-center gap-2">
+                        <label className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-stone-500">
+                            <Filter className="h-3.5 w-3.5" strokeWidth={2.5} />
+                            Month
+                        </label>
                         <select
                             value={selectedMonthFilter}
                             onChange={(e) => setSelectedMonthFilter(e.target.value)}
-                            className="border border-gray-300 p-2 rounded-lg text-xs font-bold bg-gray-50"
+                            className="select w-auto py-2 text-xs font-bold"
                         >
                             <option value="all">All Time</option>
                             {availableMonths.map((m) => (
@@ -378,123 +439,146 @@ export default function TaskManagement() {
                     </div>
                 </div>
 
-                {fetchingTasks ? (
-                    <div className="text-xs font-bold text-gray-500 py-4">Loading workers...</div>
-                ) : tasksByWorker.length === 0 ? (
-                    <div className="text-sm text-gray-500 py-4">No registered workers found.</div>
-                ) : (
-                    <div className="space-y-4">
-                        {tasksByWorker.map((group) => {
-                            const isExpanded = !!expandedWorkers[group.workerId];
+                <div className="card-body">
+                    {fetchingTasks ? (
+                        <div className="empty-state">
+                            <Loader2 className="h-6 w-6 animate-spin text-amber-800" strokeWidth={2.5} />
+                            <p className="text-sm font-semibold text-stone-500">Loading workers...</p>
+                        </div>
+                    ) : tasksByWorker.length === 0 ? (
+                        <div className="empty-state">
+                            <span className="grid h-12 w-12 place-items-center rounded-2xl bg-stone-100 text-stone-400">
+                                <Inbox className="h-5 w-5" strokeWidth={2} />
+                            </span>
+                            <p className="text-sm font-bold text-stone-700">No registered workers found.</p>
+                            <p className="subtle">Create an employee account to start assigning tasks.</p>
+                        </div>
+                    ) : (
+                        <div className="space-y-3">
+                            {tasksByWorker.map((group) => {
+                                const isExpanded = !!expandedWorkers[group.workerId];
 
-                            return (
-                                <div
-                                    key={group.workerId}
-                                    className="border border-gray-200 rounded-xl overflow-hidden transition-all shadow-sm"
-                                >
-                                    <button
-                                        onClick={() => toggleWorkerAccordion(group.workerId)}
-                                        className="w-full bg-gray-50 hover:bg-gray-100 p-4 flex items-center justify-between text-left transition-colors"
+                                return (
+                                    <div
+                                        key={group.workerId}
+                                        className={`overflow-hidden rounded-2xl border transition-all ${
+                                            isExpanded
+                                                ? 'border-amber-200 shadow-card'
+                                                : 'border-stone-200 shadow-sm hover:border-stone-300'
+                                        }`}
                                     >
-                                        <div className="flex items-center gap-3">
-                                            <span className="font-bold text-gray-900 text-sm">
-                                                {group.fullName}
-                                            </span>
-                                            <span className="text-xs bg-gray-200 text-gray-700 font-bold px-2.5 py-0.5 rounded-full">
-                                                {group.totalCount} {group.totalCount === 1 ? 'Task' : 'Tasks'} Total
-                                            </span>
-                                        </div>
+                                        <button
+                                            onClick={() => toggleWorkerAccordion(group.workerId)}
+                                            className={`flex w-full items-center justify-between gap-4 p-4 text-left transition-colors ${
+                                                isExpanded ? 'bg-amber-50/70' : 'bg-stone-50 hover:bg-stone-100'
+                                            }`}
+                                        >
+                                            <div className="flex min-w-0 items-center gap-3">
+                                                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-brass-sheen text-[11px] font-extrabold tracking-wide text-amber-100">
+                                                    {initials(group.fullName)}
+                                                </span>
+                                                <div className="min-w-0">
+                                                    <p className="truncate text-sm font-bold text-stone-900">
+                                                        {group.fullName}
+                                                    </p>
+                                                    <p className="subtle mt-0.5">
+                                                        {group.totalCount} {group.totalCount === 1 ? 'Task' : 'Tasks'} Total
+                                                    </p>
+                                                </div>
+                                            </div>
 
-                                        <div className="flex items-center gap-4">
-                                            <div className="text-xs flex gap-2 font-bold">
-                                                {group.activeCount > 0 && (
-                                                    <span className="text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded">
-                                                        {group.activeCount} Active
-                                                    </span>
-                                                )}
-                                                <span className="text-green-700 bg-green-50 border border-green-200 px-2 py-0.5 rounded">
-                                                    {group.completedCount} Verified
+                                            <div className="flex shrink-0 items-center gap-3">
+                                                <div className="hidden gap-2 sm:flex">
+                                                    {group.activeCount > 0 && (
+                                                        <span className="pill-amber">{group.activeCount} Active</span>
+                                                    )}
+                                                    <span className="pill-green">{group.completedCount} Verified</span>
+                                                </div>
+                                                <span
+                                                    className={`grid h-8 w-8 place-items-center rounded-lg transition-colors ${
+                                                        isExpanded
+                                                            ? 'bg-amber-100 text-amber-900'
+                                                            : 'bg-white text-stone-400'
+                                                    }`}
+                                                >
+                                                    {isExpanded ? (
+                                                        <ChevronUp className="h-4 w-4" strokeWidth={2.5} />
+                                                    ) : (
+                                                        <ChevronDown className="h-4 w-4" strokeWidth={2.5} />
+                                                    )}
                                                 </span>
                                             </div>
-                                            <span className="text-xs font-black text-gray-400">
-                                                {isExpanded ? '▲ Hide' : '▼ View History'}
-                                            </span>
-                                        </div>
-                                    </button>
+                                        </button>
 
-                                    {isExpanded && (
-                                        <div className="p-4 bg-white border-t border-gray-200">
-                                            {group.tasks.length === 0 ? (
-                                                <div className="text-xs font-medium text-gray-400 py-2">
-                                                    No tasks recorded for this period.
-                                                </div>
-                                            ) : (
-                                                <div className="overflow-x-auto">
-                                                    <table className="w-full text-left border-collapse">
-                                                        <thead>
-                                                            <tr className="border-b border-gray-200 text-xs font-bold uppercase text-gray-400">
-                                                                <th className="py-2.5 px-2">Worker Name</th>
-                                                                <th className="py-2.5 px-2">Order</th>
-                                                                <th className="py-2.5 px-2">Task Details</th>
-                                                                <th className="py-2.5 px-2">Status</th>
-                                                                <th className="py-2.5 px-2 text-right">Action</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody className="divide-y divide-gray-100 text-xs">
-                                                            {group.tasks.map((task) => (
-                                                                <tr key={task.id} className="hover:bg-gray-50">
-                                                                    <td className="py-3 px-2 font-bold text-gray-900">
-                                                                        {task.worker_name}
-                                                                    </td>
-                                                                    <td className="py-3 px-2 font-semibold text-gray-600">
-                                                                        {task.order_display}
-                                                                    </td>
-                                                                    <td className="py-3 px-2 text-gray-800 font-medium max-w-sm">
-                                                                        {task.task_details}
-                                                                    </td>
-                                                                    <td className="py-3 px-2">
-                                                                        <span
-                                                                            className={`font-black uppercase px-2 py-0.5 rounded-full text-[10px] ${task.status === 'Completed'
-                                                                                    ? 'bg-green-100 text-green-800'
-                                                                                    : task.status === 'Under Review'
-                                                                                        ? 'bg-amber-100 text-amber-800 animate-pulse'
-                                                                                        : 'bg-blue-100 text-blue-800'
-                                                                                }`}
-                                                                        >
-                                                                            {task.status}
-                                                                        </span>
-                                                                    </td>
-                                                                    <td className="py-3 px-2 text-right space-x-2">
-                                                                        {task.status === 'Under Review' ? (
-                                                                            <button
-                                                                                onClick={() => handleApproveTask(task.id)}
-                                                                                className="bg-green-700 hover:bg-green-800 text-white font-bold px-2.5 py-1 rounded transition-colors text-[10px] uppercase"
-                                                                            >
-                                                                                Approve & Complete
-                                                                            </button>
-                                                                        ) : task.status === 'Completed' ? (
-                                                                            <span className="font-bold text-gray-400 uppercase text-[10px]">
-                                                                                Verified
-                                                                            </span>
-                                                                        ) : (
-                                                                            <span className="font-bold text-blue-800 italic text-[10px]">
+                                        {isExpanded && (
+                                            <div className="border-t border-stone-200 bg-white animate-fade-in">
+                                                {group.tasks.length === 0 ? (
+                                                    <p className="px-4 py-6 text-center text-xs font-medium text-stone-400">
+                                                        No tasks recorded for this period.
+                                                    </p>
+                                                ) : (
+                                                    <div className="table-wrap">
+                                                        <table className="table">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>Worker Name</th>
+                                                                    <th>Order</th>
+                                                                    <th>Task Details</th>
+                                                                    <th>Status</th>
+                                                                    <th className="text-right">Action</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody className="text-xs">
+                                                                {group.tasks.map((task) => (
+                                                                    <tr key={task.id}>
+                                                                        <td className="whitespace-nowrap font-bold text-stone-900">
+                                                                            {task.worker_name}
+                                                                        </td>
+                                                                        <td className="whitespace-nowrap font-semibold text-stone-600">
+                                                                            {task.order_display}
+                                                                        </td>
+                                                                        <td className="max-w-sm font-medium text-stone-800">
+                                                                            {task.task_details}
+                                                                        </td>
+                                                                        <td>
+                                                                            <span className={statusPillClass(task.status)}>
                                                                                 {task.status}
                                                                             </span>
-                                                                        )}
-                                                                    </td>
-                                                                </tr>
-                                                            ))}
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            )}
-                                        </div>
-                                    )}
-                                </div>
-                            );
-                        })}
-                    </div>
-                )}
+                                                                        </td>
+                                                                        <td className="text-right">
+                                                                            {task.status === 'Under Review' ? (
+                                                                                <button
+                                                                                    onClick={() => handleApproveTask(task.id)}
+                                                                                    className="btn-success btn-sm"
+                                                                                >
+                                                                                    <CheckCircle2 className="h-3 w-3" strokeWidth={2.5} />
+                                                                                    Approve
+                                                                                </button>
+                                                                            ) : task.status === 'Completed' ? (
+                                                                                <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wide text-stone-400">
+                                                                                    <CheckCircle2 className="h-3 w-3" strokeWidth={2.5} />
+                                                                                    Verified
+                                                                                </span>
+                                                                            ) : (
+                                                                                <span className="text-[10px] font-bold uppercase tracking-wide text-blue-700">
+                                                                                    {task.status}
+                                                                                </span>
+                                                                            )}
+                                                                        </td>
+                                                                    </tr>
+                                                                ))}
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );
