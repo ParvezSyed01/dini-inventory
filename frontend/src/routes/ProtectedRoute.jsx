@@ -1,32 +1,20 @@
-import { Navigate, Outlet } from 'react-router-dom';
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import FullScreenLoader from '../components/FullScreenLoader';
+import { LOGIN_PATH } from './paths';
+
+const WORKER_FALLBACK = '/my-tasks';
 
 export function ProtectedRoute({ allowedRoles }) {
   const { role, user, loading } = useAuth();
+  const location = useLocation();
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-3">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className="h-7 w-7 animate-spin text-amber-800"
-          aria-hidden="true"
-        >
-          <path d="M21 12a9 9 0 1 1-6.219-8.56" />
-        </svg>
-        <p className="text-xs font-bold uppercase tracking-[0.14em] text-stone-400">Loading</p>
-      </div>
-    );
+    return <FullScreenLoader />;
   }
 
   if (!user) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to={LOGIN_PATH} replace />;
   }
 
   // Normalize role to handle lowercase casing
@@ -34,8 +22,14 @@ export function ProtectedRoute({ allowedRoles }) {
   const normalizedAllowedRoles = allowedRoles ? allowedRoles.map(r => r.toLowerCase()) : [];
 
   if (allowedRoles && !normalizedAllowedRoles.includes(userRole)) {
+    // A role that isn't in the worker list either (e.g. a custom role) would
+    // bounce from /my-tasks straight back to /my-tasks forever. Break the loop.
+    if (location.pathname === WORKER_FALLBACK) {
+      return <Navigate to="/unauthorized" replace />;
+    }
+
     // If worker tries to visit an admin route, send them to /my-tasks
-    return <Navigate to="/my-tasks" replace />;
+    return <Navigate to={WORKER_FALLBACK} replace />;
   }
 
   return <Outlet />;

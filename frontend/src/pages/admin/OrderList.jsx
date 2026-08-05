@@ -321,16 +321,16 @@ export default function OrderList() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-stone-950/60 p-4 backdrop-blur-sm animate-fade-in">
           <div className="card max-h-[90vh] w-full max-w-3xl overflow-y-auto shadow-pop animate-pop-in">
             {/* Modal header */}
-            <div className="sticky top-0 z-10 flex items-start justify-between gap-4 rounded-t-2xl bg-brass-sheen p-6 text-white">
+            <div className="page-banner sticky top-0 z-10 flex items-start justify-between gap-4 rounded-t-2xl p-6">
               <div className="min-w-0">
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200/25 bg-amber-100/10 px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-amber-200">
+                <span className="pill-amber font-mono">
                   <FileText className="h-3 w-3" strokeWidth={2.5} />
                   Order Register
                 </span>
-                <h3 className="mt-2 truncate font-display text-2xl font-extrabold text-amber-50">
+                <h3 className="mt-2.5 truncate font-display text-2xl font-semibold tracking-tight text-stone-900">
                   {selectedOrder.customers?.name}
                 </h3>
-                <p className="mt-1 flex items-center gap-1.5 font-mono text-xs text-amber-200/70">
+                <p className="mt-1.5 flex items-center gap-1.5 font-mono text-xs text-stone-500">
                   <Phone className="h-3 w-3" strokeWidth={2.5} />
                   {selectedOrder.customers?.phone}
                 </p>
@@ -338,7 +338,7 @@ export default function OrderList() {
               <button
                 onClick={() => setSelectedOrder(null)}
                 aria-label="Close register"
-                className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-amber-200/20 bg-amber-100/5 text-amber-200 transition-colors hover:bg-amber-100/15 hover:text-white"
+                className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-stone-300 bg-white text-stone-500 shadow-sm transition-colors hover:border-red-200 hover:bg-red-50 hover:text-red-700"
               >
                 <X className="h-4 w-4" strokeWidth={2.5} />
               </button>

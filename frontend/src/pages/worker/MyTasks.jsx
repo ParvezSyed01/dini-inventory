@@ -127,7 +127,7 @@ export default function MyTasks() {
       {/* Header */}
       <div className="card flex flex-wrap items-center justify-between gap-4 p-5">
         <div className="flex items-center gap-3">
-          <span className="grid h-11 w-11 place-items-center rounded-2xl bg-brass-sheen text-amber-200">
+          <span className="grid h-11 w-11 place-items-center rounded-2xl chip-dark">
             <ListChecks className="h-5 w-5" strokeWidth={2.2} />
           </span>
           <div>
@@ -191,7 +191,7 @@ export default function MyTasks() {
                   )}
                 </div>
 
-                <div className="flex justify-end border-t border-stone-100 pt-3.5 pl-2">
+                <div className="flex justify-end border-t border-stone-200 pt-3.5 pl-2">
                   {task.status === 'Pending' || task.status === 'In Progress' ? (
                     <button
                       onClick={() => handleMarkForReview(task.id, task.task_details)}

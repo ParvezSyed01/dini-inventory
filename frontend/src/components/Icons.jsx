@@ -203,6 +203,18 @@ export const ChevronUp = (p) => (
     </Icon>
 );
 
+export const ChevronLeft = (p) => (
+    <Icon {...p}>
+        <path d="m15 18-6-6 6-6" />
+    </Icon>
+);
+
+export const ChevronRight = (p) => (
+    <Icon {...p}>
+        <path d="m9 18 6-6-6-6" />
+    </Icon>
+);
+
 export const RefreshCw = (p) => (
     <Icon {...p}>
         <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
@@ -294,6 +306,24 @@ export const Calendar = (p) => (
         <path d="M16 2v4" />
         <rect width="18" height="18" x="3" y="4" rx="2" />
         <path d="M3 10h18" />
+    </Icon>
+);
+
+export const CalendarCheck = (p) => (
+    <Icon {...p}>
+        <path d="M8 2v4" />
+        <path d="M16 2v4" />
+        <rect width="18" height="18" x="3" y="4" rx="2" />
+        <path d="M3 10h18" />
+        <path d="m9 16 2 2 4-4" />
+    </Icon>
+);
+
+export const UserCheck = (p) => (
+    <Icon {...p}>
+        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+        <circle cx="9" cy="7" r="4" />
+        <polyline points="16 11 18 13 22 9" />
     </Icon>
 );
 

@@ -243,15 +243,15 @@ export default function CreateOrder() {
     <div className="mx-auto max-w-5xl space-y-6">
       {/* Page header */}
       <div className="card overflow-hidden">
-        <div className="bg-brass-sheen px-6 py-7 text-center">
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200/25 bg-amber-100/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-amber-200">
+        <div className="page-banner py-8 text-center">
+          <span className="pill-amber">
             <Ruler className="h-3 w-3" strokeWidth={2.5} />
             New Entry
           </span>
-          <h1 className="mt-3 font-display text-2xl font-extrabold uppercase tracking-[0.06em] text-amber-50">
+          <h1 className="mt-3.5 font-display text-[26px] font-semibold tracking-tight text-stone-900">
             New Body Measurement Entry
           </h1>
-          <p className="mt-1.5 text-xs text-amber-200/70">
+          <p className="subtle mx-auto mt-2 max-w-md">
             Look up an existing client to auto-fill their last recorded measurements.
           </p>
         </div>
@@ -416,7 +416,7 @@ export default function CreateOrder() {
           </div>
 
           <div className="card-body grid grid-cols-1 gap-x-10 gap-y-3 lg:grid-cols-2">
-            <div className="space-y-3 lg:border-r lg:border-stone-100 lg:pr-8">
+            <div className="space-y-3 lg:border-r lg:border-stone-200 lg:pr-8">
               {leftColumnFields.map(renderMeasureField)}
             </div>
             <div className="space-y-3">{rightColumnFields.map(renderMeasureField)}</div>

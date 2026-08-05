@@ -294,23 +294,21 @@ export default function FabricInventory() {
     <div className="mx-auto max-w-6xl space-y-6">
       {/* ---------- Page header + summary ---------- */}
       <div className="card overflow-hidden">
-        <div className="flex flex-wrap items-center justify-between gap-4 bg-brass-sheen px-6 py-6">
-          <div className="flex items-center gap-3">
-            <span className="grid h-11 w-11 place-items-center rounded-2xl bg-amber-100/10 ring-1 ring-amber-200/25">
-              <Layers className="h-5 w-5 text-amber-200" strokeWidth={2.2} />
+        <div className="page-banner flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center gap-3.5">
+            <span className="tile-gold h-11 w-11">
+              <Layers className="h-5 w-5" strokeWidth={2} />
             </span>
             <div>
-              <h2 className="font-display text-xl font-extrabold tracking-tight text-amber-50 sm:text-2xl">
-                Fabric Stock & Allocation
-              </h2>
-              <p className="mt-0.5 text-xs text-amber-200/70">
+              <h2 className="page-title">Fabric Stock &amp; Allocation</h2>
+              <p className="subtle mt-1">
                 Issue material to workers and keep the roll register current
               </p>
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 divide-y divide-stone-100 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+        <div className="grid grid-cols-1 divide-y divide-stone-200 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
           <div className="px-6 py-4">
             <p className="eyebrow">Total Stock On Hand</p>
             <p className="mt-1.5 font-display text-xl font-extrabold text-stone-900">

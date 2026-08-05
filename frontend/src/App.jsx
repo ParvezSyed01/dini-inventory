@@ -1,12 +1,16 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ProtectedRoute } from './routes/ProtectedRoute';
+import { GuestRoute } from './routes/GuestRoute';
+import { LOGIN_PATH, panelPathFor } from './routes/paths';
+import FullScreenLoader from './components/FullScreenLoader';
 import Layout from './components/Layout';
 import Login from './pages/Login';
 import CreateOrder from './pages/admin/CreateOrder';
 import OrderList from './pages/admin/OrderList';
 import FabricInventory from './pages/admin/FabricInventory';
 import TaskManagement from './pages/admin/TaskManagement';
+import Attendance from './pages/admin/Attendance';
 import MyTasks from './pages/worker/MyTasks';
 import CreateEmployee from './pages/admin/CreateEmployee';
 
@@ -42,9 +46,19 @@ const Unauthorized = () => (
 
 // Smart catch-all redirect based on role
 function DefaultRedirect() {
-    const { role } = useAuth();
-    const isAdmin = role?.toLowerCase() === 'admin';
-    return <Navigate to={isAdmin ? "/admin/orders" : "/my-tasks"} replace />;
+    const { user, role, loading } = useAuth();
+
+    // Wait for the session AND the role before choosing a destination,
+    // otherwise an admin can land on the worker panel.
+    if (loading || (user && !role)) {
+        return <FullScreenLoader />;
+    }
+
+    if (!user) {
+        return <Navigate to={LOGIN_PATH} replace />;
+    }
+
+    return <Navigate to={panelPathFor(role)} replace />;
 }
 
 export default function App() {
@@ -52,7 +66,14 @@ export default function App() {
         <AuthProvider>
             <BrowserRouter>
                 <Routes>
-                    <Route path="/login" element={<Login />} />
+                    {/* Login lives at the root. Signed-in users are bounced to their panel. */}
+                    <Route element={<GuestRoute />}>
+                        <Route path="/" element={<Login />} />
+                    </Route>
+
+                    {/* Old bookmarks and any stale links keep working */}
+                    <Route path="/login" element={<Navigate to={LOGIN_PATH} replace />} />
+
                     <Route path="/unauthorized" element={<Unauthorized />} />
 
                     {/* Admin-only Routes */}
@@ -62,6 +83,7 @@ export default function App() {
                             <Route path="/admin/orders/new" element={<CreateOrder />} />
                             <Route path="/admin/inventory" element={<FabricInventory />} />
                             <Route path="/admin/tasks" element={<TaskManagement />} />
+                            <Route path="/admin/attendance" element={<Attendance />} />
                             <Route path="/admin/employees/new" element={<CreateEmployee />} />
                         </Route>
                     </Route>

@@ -283,7 +283,7 @@ export default function TaskManagement() {
             {/* TOP HEADER */}
             <div className="card flex flex-wrap items-center justify-between gap-4 p-5">
                 <div className="flex items-center gap-3">
-                    <span className="grid h-11 w-11 place-items-center rounded-2xl bg-brass-sheen text-amber-200">
+                    <span className="grid h-11 w-11 place-items-center rounded-2xl chip-dark">
                         <ListChecks className="h-5 w-5" strokeWidth={2.2} />
                     </span>
                     <div>
@@ -377,7 +377,7 @@ export default function TaskManagement() {
                                 />
                             </div>
 
-                            <div className="flex justify-end gap-3 border-t border-stone-100 pt-4">
+                            <div className="flex justify-end gap-3 border-t border-stone-200 pt-4">
                                 <button
                                     type="button"
                                     onClick={() => setShowAssignForm(false)}
@@ -474,7 +474,7 @@ export default function TaskManagement() {
                                             }`}
                                         >
                                             <div className="flex min-w-0 items-center gap-3">
-                                                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-brass-sheen text-[11px] font-extrabold tracking-wide text-amber-100">
+                                                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl chip-dark text-[11px] font-extrabold tracking-wide">
                                                     {initials(group.fullName)}
                                                 </span>
                                                 <div className="min-w-0">

@@ -63,7 +63,7 @@ export default function Login() {
         />
         <div
           className="pointer-events-none absolute -top-28 -right-28 h-96 w-96 rounded-full blur-3xl"
-          style={{ background: 'radial-gradient(circle, rgba(251,191,36,0.28), transparent 70%)' }}
+          style={{ background: 'radial-gradient(circle, rgba(176,141,87,0.35), transparent 70%)' }}
         />
 
         <div className="relative flex items-center gap-3">
@@ -71,8 +71,8 @@ export default function Login() {
             <Scissors className="h-5 w-5 text-amber-200" strokeWidth={2.5} />
           </span>
           <div>
-            <p className="font-display text-lg font-extrabold tracking-[0.18em] text-amber-50 leading-none">
-              DINI DESIGNERS
+            <p className="font-display text-[21px] font-semibold tracking-tight text-amber-50 leading-none">
+              Dini Designers
             </p>
             <p className="mt-1.5 text-[9px] font-bold uppercase tracking-[0.24em] text-amber-200/60 leading-none">
               Atelier Management
@@ -81,7 +81,7 @@ export default function Login() {
         </div>
 
         <div className="relative max-w-md">
-          <h1 className="font-display text-4xl font-extrabold leading-[1.15] text-amber-50">
+          <h1 className="font-display text-[42px] font-semibold leading-[1.12] tracking-tight text-amber-50">
             Every stitch,
             <br />
             <span className="text-amber-300">accounted for.</span>
@@ -116,8 +116,8 @@ export default function Login() {
             <span className="grid h-14 w-14 place-items-center rounded-2xl bg-brass-sheen shadow-card">
               <Scissors className="h-6 w-6 text-amber-200" strokeWidth={2.5} />
             </span>
-            <p className="mt-4 font-display text-lg font-extrabold tracking-[0.18em] text-amber-950">
-              DINI DESIGNERS
+            <p className="mt-4 font-display text-xl font-semibold tracking-tight text-stone-900">
+              Dini Designers
             </p>
             <p className="mt-1 text-[9px] font-bold uppercase tracking-[0.22em] text-stone-400">
               Atelier Management
@@ -127,7 +127,7 @@ export default function Login() {
           <div className="card p-7 sm:p-9">
             <div className="mb-7">
               <p className="eyebrow">Secure Access</p>
-              <h2 className="mt-2 font-display text-2xl font-extrabold tracking-tight text-amber-950">
+              <h2 className="mt-2 font-display text-[26px] font-semibold tracking-tight text-stone-900">
                 Welcome back
               </h2>
               <p className="mt-1.5 text-sm text-stone-500">

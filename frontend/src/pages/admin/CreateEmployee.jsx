@@ -103,14 +103,14 @@ export default function CreateEmployee() {
                 {/* ---------- Create form ---------- */}
                 <div className="lg:col-span-2">
                     <div className="card overflow-hidden lg:sticky lg:top-24">
-                        <div className="bg-brass-sheen px-6 py-6">
-                            <span className="grid h-11 w-11 place-items-center rounded-2xl bg-amber-100/10 ring-1 ring-amber-200/25">
-                                <UserPlus className="h-5 w-5 text-amber-200" strokeWidth={2.2} />
+                        <div className="page-banner">
+                            <span className="tile-gold h-11 w-11">
+                                <UserPlus className="h-5 w-5" strokeWidth={2} />
                             </span>
-                            <h1 className="mt-3.5 font-display text-lg font-extrabold uppercase tracking-[0.05em] text-amber-50">
+                            <h1 className="mt-3.5 font-display text-xl font-semibold tracking-tight text-stone-900">
                                 Create Employee Account
                             </h1>
-                            <p className="mt-1 text-xs text-amber-200/70">
+                            <p className="subtle mt-1.5">
                                 New staff can sign in immediately with these credentials.
                             </p>
                         </div>
@@ -231,7 +231,7 @@ export default function CreateEmployee() {
                                             <tr key={emp.id}>
                                                 <td>
                                                     <div className="flex items-center gap-3">
-                                                        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-brass-sheen text-[11px] font-extrabold tracking-wide text-amber-100">
+                                                        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl chip-dark text-[11px] font-extrabold tracking-wide">
                                                             {initials(emp.full_name || emp.email)}
                                                         </span>
                                                         <span className="font-semibold text-stone-900">
