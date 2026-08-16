@@ -28,6 +28,8 @@ jobs:
       - name: Sync Frontend Code to Capacitor Android Project
         run: |
           cd frontend
+          npm install @capacitor/android
+          npx cap add android || true # 👈 Ensures the android folder is created if missing
           npx cap sync android
 
       - name: Compile Production APK File via Gradle
