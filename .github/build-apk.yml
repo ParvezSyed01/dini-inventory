@@ -1,0 +1,43 @@
+name: Build Mobile Android APK
+on: [push] # Automatically triggers every time you run 'git push'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Set up Java Environment
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Set up Node.js Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Compile React Frontend Web App
+        run: |
+          cd frontend
+          npm install
+          npm run build
+
+      - name: Sync Frontend Code to Capacitor Android Project
+        run: |
+          cd frontend
+          npx cap sync android
+
+      - name: Compile Production APK File via Gradle
+        run: |
+          cd frontend/android
+          chmod +x gradlew
+          ./gradlew assembleDebug
+
+      - name: Upload Finished APK File as Download Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Mobile-App-APK
+          path: frontend/android/app/build/outputs/apk/debug/app-debug.apk
