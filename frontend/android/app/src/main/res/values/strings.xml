@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Dini Designer Inventory</string>
+    <string name="title_activity_main">Dini Designer Inventory</string>
+    <string name="package_name">com.dinidesigner.inventory</string>
+    <string name="custom_url_scheme">com.dinidesigner.inventory</string>
+</resources>
