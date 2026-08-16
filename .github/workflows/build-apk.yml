@@ -1,5 +1,5 @@
 name: Build Mobile Android APK
-on: [push] # Automatically triggers every time you run 'git push'
+on: [push]
 
 jobs:
   build:
@@ -29,8 +29,19 @@ jobs:
         run: |
           cd frontend
           npm install @capacitor/android
-          npx cap add android || true # 👈 Ensures the android folder is created if missing
+          npx cap add android || true
           npx cap sync android
+
+      # 👇 THIS NEW STEP AUTOMATICALLY FIXES THE "FAILED TO FETCH" BLOCK ON THE CLOUD
+      - name: Inject Android Network Security Rules
+        run: |
+          MANIFEST_PATH="frontend/android/app/src/main/AndroidManifest.xml"
+          
+          # 1. Inject the INTERNET and ACCESS_NETWORK_STATE permissions cleanly into the manifest template
+          sed -i '/<manifest/a \    <uses-permission android:name="android.permission.INTERNET" />\n    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />' $MANIFEST_PATH
+          
+          # 2. Inject cleartext traffic rules so Android allows Supabase API requests
+          sed -i 's/<application/<application android:usesCleartextTraffic="true"/g' $MANIFEST_PATH
 
       - name: Compile Production APK File via Gradle
         run: |
