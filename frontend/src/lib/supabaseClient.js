@@ -14,8 +14,8 @@ const clean = (value) =>
     .trim()
     .replace(/^["']|["']$/g, ''); // strip accidental wrapping quotes
 
-const supabaseUrl = clean(import.meta.env.VITE_SUPABASE_URL);
-const supabaseAnonKey = clean(import.meta.env.VITE_SUPABASE_ANON_KEY);
+const supabaseUrl = clean(import.meta.env.VITE_SUPABASE_URL || "https://supabase.co");
+const supabaseAnonKey = clean(import.meta.env.VITE_SUPABASE_ANON_KEY || "your-actual-long-public-anon-key-string");
 
 if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error(
