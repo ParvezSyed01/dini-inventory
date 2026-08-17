@@ -11,9 +11,6 @@
 @layer base {
   html {
     -webkit-text-size-adjust: 100%;
-    /* The fixed bottom nav + sticky app bar make an accidental horizontal
-       scroll read as broken chrome rather than a swipe gesture. */
-    overflow-x: hidden;
   }
 
   body {
@@ -31,13 +28,11 @@
     font-family: theme('fontFamily.body');
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    /* x-only, and on body rather than html — Android's WebView has been
+       observed to drop vertical scrolling entirely when overflow-x is set
+       on the root <html> element, or when touch-action/overscroll-behavior
+       are applied at that level. Keeping this the one narrow rule here. */
     overflow-x: hidden;
-    /* Kills the 300ms double-tap-zoom delay so taps feel native, without
-       disabling pinch-zoom accessibility the way a viewport lock would. */
-    touch-action: manipulation;
-    /* Stops the whole page from rubber-banding on Android WebView — only
-       elements that opt in (like .table-wrap) scroll past their bounds. */
-    overscroll-behavior-y: none;
   }
 
   h1,
@@ -61,6 +56,10 @@
   select,
   textarea {
     -webkit-tap-highlight-color: transparent;
+    /* Kills the 300ms double-tap-zoom delay on tappable controls so taps
+       feel native. Scoped to these elements (not html/body) so it can never
+       interfere with the page's own vertical scrolling. */
+    touch-action: manipulation;
   }
 
   td,
