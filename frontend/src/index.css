@@ -11,6 +11,9 @@
 @layer base {
   html {
     -webkit-text-size-adjust: 100%;
+    /* The fixed bottom nav + sticky app bar make an accidental horizontal
+       scroll read as broken chrome rather than a swipe gesture. */
+    overflow-x: hidden;
   }
 
   body {
@@ -28,6 +31,13 @@
     font-family: theme('fontFamily.body');
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+    /* Kills the 300ms double-tap-zoom delay so taps feel native, without
+       disabling pinch-zoom accessibility the way a viewport lock would. */
+    touch-action: manipulation;
+    /* Stops the whole page from rubber-banding on Android WebView — only
+       elements that opt in (like .table-wrap) scroll past their bounds. */
+    overscroll-behavior-y: none;
   }
 
   h1,
@@ -156,7 +166,7 @@
   }
 
   .input {
-    @apply w-full rounded-xl border border-stone-300 bg-white px-3.5 py-2.5 text-sm text-stone-900
+    @apply w-full min-h-tap rounded-xl border border-stone-300 bg-white px-3.5 py-2.5 text-[15px] text-stone-900
            shadow-sm transition duration-150 placeholder:text-stone-400
            hover:border-stone-400
            focus:border-amber-500 focus:ring-4 focus:ring-amber-500/15 focus:outline-none
@@ -176,10 +186,11 @@
 
   /* ---------- Buttons ---------- */
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5
+    @apply inline-flex min-h-tap items-center justify-center gap-2 rounded-xl px-4 py-2.5
            text-[11px] font-bold uppercase tracking-[0.12em] leading-none
            transition-all duration-150 select-none
-           disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none;
+           active:scale-[0.97]
+           disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none disabled:active:scale-100;
   }
 
   /* Antique brass at 4.8:1 against white text */
@@ -214,7 +225,7 @@
   }
 
   .btn-sm {
-    @apply px-3 py-2 text-[10px] rounded-lg gap-1.5;
+    @apply min-h-11 px-3 py-2 text-[10px] rounded-lg gap-1.5;
   }
 
   .btn-lg {
@@ -223,6 +234,24 @@
 
   .btn-block {
     @apply w-full;
+  }
+
+  /* Square icon-only tap targets — nav bars, modal close, stepper controls */
+  .icon-btn {
+    @apply grid h-12 w-12 shrink-0 place-items-center rounded-xl
+           border border-stone-300 bg-white text-stone-600 shadow-sm
+           transition-all duration-150 select-none
+           hover:border-amber-400 hover:bg-amber-50 hover:text-amber-700
+           active:scale-[0.95]
+           disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100;
+  }
+
+  .icon-btn-sm {
+    @apply icon-btn h-11 w-11;
+  }
+
+  .icon-btn-ghost {
+    @apply icon-btn border-transparent bg-transparent shadow-none hover:border-transparent hover:bg-stone-100 hover:text-stone-800;
   }
 
   /* ---------- Pills ---------- */
@@ -284,6 +313,31 @@
   /* ---------- Tables ---------- */
   .table-wrap {
     @apply overflow-x-auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+  }
+
+  /* Below lg, these tables reliably overflow (too many columns for a phone),
+     so a soft edge fade reads as "swipe for more" instead of an abrupt crop.
+     Scoped to mobile only — on desktop the table usually already fits, and
+     fading a header/cell that isn't actually clipped would look broken. */
+  @media (max-width: 1023px) {
+    .table-wrap {
+      mask-image: linear-gradient(
+        to right,
+        transparent 0,
+        black 20px,
+        black calc(100% - 20px),
+        transparent 100%
+      );
+      -webkit-mask-image: linear-gradient(
+        to right,
+        transparent 0,
+        black 20px,
+        black calc(100% - 20px),
+        transparent 100%
+      );
+    }
   }
 
   .table {
@@ -346,5 +400,73 @@
 
   .empty-state {
     @apply flex flex-col items-center justify-center gap-2 px-6 py-14 text-center;
+  }
+
+  /* ---------- Safe-area padding ---------- */
+  /* env() resolves to 0 outside the Capacitor shell, so these are free to
+     use everywhere — they only do anything behind an Android status bar or
+     gesture nav bar. */
+  .pt-safe {
+    padding-top: env(safe-area-inset-top);
+  }
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  /* ---------- Mobile app bar ---------- */
+  .app-bar {
+    @apply sticky top-0 z-30 border-b border-stone-200 bg-sand/90 backdrop-blur-md pt-safe;
+  }
+
+  /* ---------- Bottom tab bar ---------- */
+  .bottom-nav {
+    @apply fixed inset-x-0 bottom-0 z-40 flex border-t border-stone-200 bg-white/95 pb-safe shadow-nav backdrop-blur-md;
+  }
+
+  .bottom-nav-item {
+    @apply flex min-h-tap flex-1 flex-col items-center justify-center gap-1 py-1.5
+           text-stone-400 transition-all duration-150 select-none active:scale-[0.94];
+  }
+
+  .bottom-nav-item-active {
+    @apply text-amber-700;
+  }
+
+  .bottom-nav-label {
+    @apply text-[9px] font-bold uppercase tracking-[0.08em] leading-none;
+  }
+
+  /* ---------- Bottom sheet (native-style "More" menu) ---------- */
+  .sheet-backdrop {
+    @apply fixed inset-0 z-50 animate-fade-in bg-stone-950/40 backdrop-blur-sm;
+  }
+
+  .sheet-panel {
+    @apply fixed inset-x-0 bottom-0 z-50 max-h-[80vh] animate-sheet-up overflow-y-auto rounded-t-3xl bg-white pb-safe shadow-pop;
+  }
+
+  .sheet-handle {
+    @apply mx-auto mt-2.5 h-1.5 w-10 shrink-0 rounded-full bg-stone-200;
+  }
+
+  .sheet-link {
+    @apply flex min-h-tap items-center gap-3 rounded-xl px-4 text-sm font-semibold text-stone-700
+           transition-colors active:bg-stone-100;
+  }
+
+  .sheet-link-active {
+    @apply bg-amber-50 text-amber-700;
+  }
+
+  /* ---------- Loading skeletons ---------- */
+  .skeleton {
+    @apply relative overflow-hidden rounded-lg bg-stone-200/70 animate-shimmer;
+    background-image: linear-gradient(
+      100deg,
+      transparent 20%,
+      rgba(255, 255, 255, 0.65) 45%,
+      transparent 70%
+    );
+    background-size: 200% 100%;
   }
 }

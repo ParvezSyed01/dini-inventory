@@ -51,7 +51,7 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen grid lg:grid-cols-2">
+    <div className="min-h-[100dvh] grid lg:grid-cols-2">
       {/* ---------- Brand panel (desktop only) ---------- */}
       <div className="relative hidden lg:flex flex-col justify-between bg-brass-sheen p-12 overflow-hidden">
         <div
@@ -180,7 +180,7 @@ export default function Login() {
                     type="button"
                     onClick={() => setShowPassword((v) => !v)}
                     aria-label={showPassword ? 'Hide password' : 'Show password'}
-                    className="absolute right-2 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center rounded-lg text-stone-400 transition-colors hover:bg-stone-100 hover:text-stone-600"
+                    className="absolute right-1.5 top-1/2 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-lg text-stone-400 transition-all active:scale-90 hover:bg-stone-100 hover:text-stone-600"
                   >
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>

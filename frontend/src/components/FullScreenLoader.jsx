@@ -6,7 +6,7 @@ import { Loader2 } from './Icons';
  */
 export default function FullScreenLoader({ label = 'Loading' }) {
     return (
-        <div className="min-h-screen flex flex-col items-center justify-center gap-3">
+        <div className="min-h-[100dvh] flex flex-col items-center justify-center gap-3">
             <Loader2 className="h-7 w-7 animate-spin text-amber-800" strokeWidth={2.5} />
             <p className="text-xs font-bold uppercase tracking-[0.14em] text-stone-400">{label}</p>
         </div>

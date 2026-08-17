@@ -364,7 +364,7 @@ export default function OrderList() {
               <button
                 onClick={() => setSelectedOrder(null)}
                 aria-label="Close register"
-                className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-stone-300 bg-white text-stone-500 shadow-sm transition-colors hover:border-red-200 hover:bg-red-50 hover:text-red-700"
+                className="icon-btn shrink-0 hover:border-red-200 hover:bg-red-50 hover:text-red-700"
               >
                 <X className="h-4 w-4" strokeWidth={2.5} />
               </button>

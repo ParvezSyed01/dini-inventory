@@ -97,6 +97,22 @@ export default {
         '2xl': '1.25rem',
       },
 
+      spacing: {
+        // Safe-area insets — 0 on most web contexts, real values inside the
+        // Capacitor Android shell once the WebView draws edge-to-edge.
+        'safe-t': 'env(safe-area-inset-top)',
+        'safe-b': 'env(safe-area-inset-bottom)',
+        'safe-l': 'env(safe-area-inset-left)',
+        'safe-r': 'env(safe-area-inset-right)',
+      },
+
+      minHeight: {
+        tap: '48px',
+      },
+      minWidth: {
+        tap: '48px',
+      },
+
       boxShadow: {
         // Warm-tinted and very soft — hard grey shadows read cheap on beige.
         card: '0 1px 2px rgba(61, 47, 27, 0.04), 0 12px 32px -20px rgba(61, 47, 27, 0.22)',
@@ -104,6 +120,8 @@ export default {
         header: '0 8px 30px -22px rgba(61, 47, 27, 0.45)',
         pop: '0 40px 80px -30px rgba(24, 20, 16, 0.45)',
         rail: '1px 0 0 0 #EAE2D4',
+        // Upward-cast shadow for a fixed bottom tab bar
+        nav: '0 -8px 24px -14px rgba(61, 47, 27, 0.28)',
       },
 
       keyframes: {
@@ -123,6 +141,14 @@ export default {
           from: { transform: 'translateX(-100%)' },
           to: { transform: 'translateX(0)' },
         },
+        'sheet-up': {
+          from: { transform: 'translateY(100%)' },
+          to: { transform: 'translateY(0)' },
+        },
+        shimmer: {
+          from: { backgroundPosition: '150% 0' },
+          to: { backgroundPosition: '-50% 0' },
+        },
       },
 
       animation: {
@@ -130,6 +156,8 @@ export default {
         'rise-in': 'rise-in 0.35s cubic-bezier(0.22, 1, 0.36, 1) both',
         'pop-in': 'pop-in 0.28s cubic-bezier(0.22, 1, 0.36, 1) both',
         'slide-in': 'slide-in 0.28s cubic-bezier(0.22, 1, 0.36, 1) both',
+        'sheet-up': 'sheet-up 0.3s cubic-bezier(0.22, 1, 0.36, 1) both',
+        shimmer: 'shimmer 1.6s ease-in-out infinite',
       },
 
       backgroundImage: {

@@ -19,7 +19,7 @@ import MyAdvances from './pages/worker/MyAdvances';
 import CreateEmployee from './pages/admin/CreateEmployee';
 
 const Unauthorized = () => (
-    <div className="min-h-screen flex items-center justify-center p-6">
+    <div className="min-h-[100dvh] flex items-center justify-center p-6">
         <div className="card max-w-sm w-full p-8 text-center">
             <span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-red-50 text-red-600">
                 <svg

@@ -292,7 +292,7 @@ export default function Attendance() {
             <button
               onClick={() => setDate((d) => shiftDate(d, -1))}
               aria-label="Previous day"
-              className="grid h-9 w-9 place-items-center rounded-xl border border-stone-300 bg-white text-stone-600 shadow-sm transition-colors hover:border-amber-400 hover:bg-amber-50 hover:text-amber-700"
+              className="icon-btn"
             >
               <ChevronLeft className="h-4 w-4" strokeWidth={2.5} />
             </button>
@@ -309,7 +309,7 @@ export default function Attendance() {
               onClick={() => setDate((d) => shiftDate(d, 1))}
               disabled={isToday}
               aria-label="Next day"
-              className="grid h-9 w-9 place-items-center rounded-xl border border-stone-300 bg-white text-stone-600 shadow-sm transition-colors hover:border-amber-400 hover:bg-amber-50 hover:text-amber-700 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-stone-300 disabled:hover:bg-white"
+              className="icon-btn"
             >
               <ChevronRight className="h-4 w-4" strokeWidth={2.5} />
             </button>
